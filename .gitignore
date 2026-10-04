@@ -1,0 +1,18 @@
+# Local market data, workspaces, diagnostics and release output
+analysis/
+samples/
+dist/
+node_modules/
+*.log
+*.pine
+*.csv
+*.tsv
+*Gamma工作檔.json
+*工作檔.json
+*_Gamma.html
+*_Table.html
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db

@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Gamma Line Studio · 每週價位工作台</title><style>:root{--bg:#0d1117;--surface:#141a22;--raised:#1b232e;--border:#2a3442;--text:#e7edf4;--muted:#9eacbc;--green:#45be75;--red:#ff4d65;--yellow:#ffd23f;--accent:#a4e6bf;--radius:12px;font-family:Inter,"Segoe UI","Microsoft JhengHei",sans-serif;color:var(--text);background:var(--bg);font-synthesis:none}*{box-sizing:border-box}body{margin:0;font-size:14px;line-height:1.55}button,input,select,textarea{font:inherit}button{cursor:pointer;border:1px solid var(--border);border-radius:7px;background:var(--raised);color:var(--text);min-height:38px;padding:8px 13px;transition:background .15s,border-color .15s}button:hover{background:#263343;border-color:#647589}button:disabled{opacity:.45;cursor:not-allowed}button.primary{background:var(--accent);color:#10261a;border-color:var(--accent);font-weight:650}button.primary:hover{background:#c0f1d3}button.quiet{background:transparent;border-color:transparent}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:3px}input,select,textarea{background:#0e141c;color:var(--text);border:1px solid #3a4757;border-radius:6px;padding:9px 10px;min-width:0}input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}input[type=range]{width:100%;accent-color:var(--accent);padding:0;cursor:pointer}input[type=number]{font-variant-numeric:tabular-nums}input[type=number]:invalid{border-color:var(--red)}a{color:var(--accent)}.app-header{height:82px;padding:0 30px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:#10161d}.brand{display:flex;align-items:center;gap:12px}.brand strong{display:block;font-size:17px;letter-spacing:-.3px}.brand>div>span{font-size:11px;color:var(--muted);letter-spacing:1px}.version{margin-left:12px;font:10px Consolas,monospace;color:var(--muted);border-left:1px solid var(--border);padding-left:20px;letter-spacing:1px}.header-actions{display:flex;gap:10px}.workspace{display:grid;grid-template-columns:278px minmax(0,1fr);max-width:1840px;margin:0 auto}.sidebar{border-right:1px solid var(--border);padding:26px 23px;background:#10161e}.section-label{color:#75869b;font:11px Consolas,monospace;letter-spacing:1px;margin-bottom:16px;display:flex;gap:13px;align-items:center}.section-label span{color:#cad5e1;font:600 13px "Segoe UI","Microsoft JhengHei",sans-serif;letter-spacing:.7px}.dropzone{border:1px dashed #435345;display:flex;flex-direction:column;align-items:center;gap:8px;padding:23px 12px;width:100%;background:#131f1c;color:#b7e8cd}.dropzone span{font-size:11px;color:var(--muted)}.dropzone.drag-over{background:#254533;border-color:var(--accent)}.sample-row{display:flex;align-items:center;gap:6px;margin:12px 0 18px;font-size:11px;color:var(--muted)}.sample-row button{font:11px Consolas,monospace;min-height:28px;padding:3px 8px;background:transparent}.field{display:flex;flex-direction:column;gap:7px;font-size:12px;color:#b6c2d1;margin:12px 0}.field select,.field input{width:100%;font-size:13px;min-height:39px}.file-info{font-size:11px;color:var(--muted);overflow-wrap:anywhere;line-height:1.8}.divider{height:1px;background:var(--border);margin:25px 0}.field-pair{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field-pair .field{margin-top:0}.segmented{display:flex;border:1px solid var(--border);padding:3px;border-radius:7px;gap:3px}.segmented button{flex:1;font-size:11px;padding:3px 4px;min-height:28px;border:0;background:transparent}.segmented button.active{background:#2b3b37;color:#c9f5db}.hint{font-size:11px;color:var(--muted);line-height:1.8;margin:12px 0}.range-field{display:block;margin:20px 0;color:#bbc7d5;font-size:12px}.range-field>span{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.range-field output{font:12px Consolas,monospace;color:var(--accent)}.full{width:100%;font-size:12px}.checkbox{display:flex;gap:8px;align-items:flex-start;font-size:12px}.checkbox input{flex-shrink:0}.local-note{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);padding-top:20px}.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}.content{padding:32px 34px;min-width:0}.page-intro{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;gap:12px}.eyebrow{font:10px Consolas,monospace;letter-spacing:2px;color:var(--accent);margin-bottom:9px}h1{font-size:26px;font-weight:550;letter-spacing:-.8px;margin:0 0 7px}h2{font-size:14px;font-weight:600;margin:0}p{margin:8px 0}.page-intro p{color:var(--muted);font-size:12px}.loaded-badge{font-size:11px;border:1px solid var(--border);border-radius:20px;padding:6px 10px;display:flex;align-items:center;gap:7px;white-space:nowrap}.metrics{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);margin-bottom:24px;padding:19px 0}.metrics>div{padding:0 22px;border-right:1px solid var(--border);min-width:0}.metrics>div:last-child{border:0}.metrics span,.metrics small{display:block;font-size:10px;color:var(--muted)}.metrics strong{display:block;font:24px Consolas,monospace;margin:8px 0 4px}.metrics small{font-size:10px}.panel{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);overflow:hidden}.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:19px 21px 12px}.panel-heading p{font-size:11px;color:var(--muted);margin:4px 0 0}.tag{font-size:10px;font-weight:400;letter-spacing:.3px;color:var(--muted);border:1px solid #354250;border-radius:4px;padding:2px 6px;margin-left:5px;white-space:nowrap}.legend{display:flex;gap:14px;font-size:10px;white-space:nowrap}.pos{color:var(--green)}.neg{color:var(--red)}.flip{color:var(--yellow)}.chart-wrap{overflow:auto;padding:0 8px}.chart-wrap svg{display:block;width:100%;min-width:570px;height:auto;touch-action:none;user-select:none}.chart-footer{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;font-size:10px;color:var(--muted);padding:11px 20px;border-top:1px solid #25303d}.week-tabs{display:flex;gap:8px;overflow:auto;padding:20px 0 15px}.week-tabs button{white-space:nowrap;background:transparent;font-size:11px;display:flex;gap:7px;align-items:center}.week-tabs button.active{border-color:#6eb591;background:#1b3328;color:#c6edda}.week-tabs small{font-size:9px;color:var(--muted)}.detail-grid{display:grid;grid-template-columns:minmax(0,.94fr) minmax(0,1.06fr);gap:18px}.detail-grid svg{display:block;width:100%;min-height:260px}.level-panel .panel-heading{padding-bottom:16px}.level-panel button{font-size:11px}.table-wrap{max-height:305px;overflow:auto}table{width:100%;border-collapse:collapse;text-align:left;font-size:11px}th{font-size:10px;font-weight:400;color:var(--muted);padding:8px 12px;background:#101720;position:sticky;top:0}td{padding:7px 10px;border-bottom:1px solid #26313e}td input[type=number]{width:100px;max-width:100%;padding:6px 8px;font:13px Consolas,monospace}td select{font-size:11px;padding:6px;width:90px}td:first-child{width:35px}td:nth-child(4){color:var(--muted);font-size:10px}td .remove{background:transparent;border:0;padding:0 7px;min-height:30px;font-size:18px;color:var(--muted)}.ce-editor{display:flex;align-items:flex-end;gap:10px;padding:2px 20px 0}.ce-editor .field{flex:1}.ce-editor button{margin-bottom:12px;min-height:39px}.inset{padding:0 20px 9px;margin-top:0}.method{margin-top:20px;font-size:12px}.method summary{cursor:pointer;padding:16px 20px;color:#bdc9d7}.method>div{padding:0 20px 18px;color:var(--muted);font-size:11px;line-height:1.9}.workspace-footer{display:flex;justify-content:space-between;margin:22px 1px 0;font-size:10px;color:#8697a9}.notice{padding:12px 16px;margin-bottom:18px;border:1px solid #70602d;border-radius:8px;color:#efdc99;background:#28251a;font-size:12px;white-space:pre-line}.notice.error{border-color:#9f4a56;background:#2d1b22;color:#ffb8c3}.notice[hidden],.toast[hidden]{display:none}dialog{background:#141c26;color:var(--text);border:1px solid #415267;border-radius:14px;padding:26px;width:min(920px,calc(100vw - 28px));max-height:90vh;box-shadow:0 28px 100px #0009}dialog::backdrop{background:#060b12ba;backdrop-filter:blur(4px)}.modal-heading{display:flex;align-items:center;justify-content:space-between}.modal-heading h2{font-size:23px}.modal-heading .close-dialog{border:0;background:transparent;font-size:26px;padding:0 10px}.modal-heading+p{font-size:12px;color:var(--muted);margin:20px 0}.export-settings{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}.export-settings .field{max-width:150px;margin:0}.export-settings button{min-height:40px}#exportStatus{font-size:12px;color:var(--accent);min-height:20px}#pineCode{display:block;width:100%;height:330px;font:11px/1.7 Consolas,monospace;resize:vertical;color:#c6dccf}.modal-bottom{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:15px}.help-steps{padding-left:24px;line-height:2;font-size:14px}.help-steps li{margin:15px 0}#helpDialog{max-width:650px}#helpDialog>p{color:var(--muted);font-size:12px}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);padding:12px 22px;background:#cfefdc;color:#112d1d;border-radius:9px;box-shadow:0 8px 30px #0006;z-index:10;max-width:90vw;font-size:13px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.drag-line{cursor:ns-resize}.drag-line:hover .visible-line{stroke-width:5}.distribution-bar{cursor:pointer}.distribution-bar:hover{opacity:1!important}.svg-week{cursor:pointer}.empty-text{padding:24px;color:var(--muted);text-align:center}svg text{font-family:Consolas,"Microsoft JhengHei",monospace}svg .grid{stroke:#28313c;stroke-width:1}svg .axis{fill:#94a4b7;font-size:11px}
+@media(min-width:1600px){.content{padding:36px 45px}.chart-wrap svg{max-height:530px}.detail-grid{grid-template-columns:1fr 1fr}}@media(max-width:1160px){.workspace{grid-template-columns:245px minmax(0,1fr)}.sidebar{padding:24px 17px}.content{padding:26px 20px}.detail-grid{grid-template-columns:1fr}.metrics>div{padding:0 14px}.legend{gap:8px}.preview-panel .panel-heading{align-items:flex-start;flex-direction:column}.loaded-badge{display:none}.metrics strong{font-size:21px}}@media(max-width:760px){.app-header{height:auto;min-height:80px;padding:16px;flex-wrap:wrap;gap:15px}.version{display:none}.header-actions{width:100%}.header-actions button{flex:1;padding:8px;font-size:11px}.workspace{display:flex;flex-direction:column}.sidebar{border-right:0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;padding:20px}.sidebar>*{min-width:0}.sidebar .divider{display:none}.sidebar .section-label,.sidebar .dropzone,.sidebar .hint,.sidebar .full,.sidebar .checkbox,.sidebar .local-note{grid-column:1/-1}.sidebar .section-label{margin:12px 0 0}.sidebar .range-field{margin:5px 0}.sidebar .range-field:nth-of-type(3){grid-column:1/-1}.sidebar .field-pair{grid-column:1/-1}.sidebar .sample-row{margin:0;flex-wrap:wrap}.sidebar>.field{margin:0}.sidebar .hint{margin:0}.sidebar .segmented{grid-column:1/-1}.content{padding:24px 16px}.page-intro{margin-bottom:20px}h1{font-size:24px}.metrics{grid-template-columns:1fr 1fr;row-gap:22px}.metrics>div:nth-child(2){border:0}.metrics strong{font-size:22px}.panel-heading{padding:16px}.chart-footer{padding:10px 14px}.export-settings{flex-wrap:wrap}.export-settings .field{flex:1}.export-settings button{flex:1;white-space:nowrap}td{padding:7px}td input[type=number]{width:87px}td select{width:85px}.modal-heading h2{font-size:19px}.modal-bottom{gap:10px;flex-wrap:wrap}.page-intro .eyebrow{font-size:9px}.field input,.field select,button{min-height:40px}}@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+.ce-actions{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.table-reference{margin-top:20px}.table-reference table{white-space:nowrap}.table-reference .table-wrap{max-height:240px}.table-reference th,.table-reference td{padding:10px 14px}.table-reference td{font-variant-numeric:tabular-nums}#cePreview{margin-top:18px}#tableText{resize:vertical;font:12px/1.7 Consolas,monospace}
+
+[hidden]{display:none!important}fieldset{border:0;padding:0;margin:0;min-width:0}fieldset:disabled{opacity:.55}button:disabled{cursor:not-allowed;opacity:.5}.file-info{margin-top:14px;white-space:pre-line}.workflow-status{border:1px solid var(--border);background:#14201f;color:#bad4c9;border-radius:8px;padding:13px 16px;margin:0 0 22px;font-size:12px;line-height:1.8;white-space:pre-line;overflow-wrap:anywhere}.workflow-status[data-state="error"]{color:#ffbdc8;background:#2d1b22;border-color:#9f4a56}.workflow-status[data-state="partial"]{background:#28251a;color:#efdc99;border-color:#70602d}.workflow-status[data-state="ready"]{border-color:#4f956e}.empty-state{padding:65px 30px;text-align:center;max-width:900px;margin:25px auto}.empty-state h2{font-size:25px;margin:14px 0}.empty-state p{max-width:470px;margin:0 auto 25px;color:var(--muted);line-height:1.9;font-size:14px}.empty-state small{display:block;margin-top:22px;font-size:12px;color:var(--muted)}.filter-help{font-size:12px;color:var(--muted);line-height:1.9;margin:18px 0}.filter-help summary{cursor:pointer;color:#bac9d7}.filter-help p{margin:12px 0}.secondary-reset{margin-top:9px;background:transparent}.inspection-controls{padding:0 20px 15px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}.inspection-controls .field{flex:1;min-width:150px;margin:5px 0}.inspection-controls .hint{width:100%;margin:0}.inspection-controls .checkbox{align-items:center;font-size:12px}.distribution-scroll{max-height:560px;overflow:auto}.contribution-section{padding:5px 20px 18px}.contribution-controls{display:flex;align-items:center;gap:12px}.contribution-controls .field{flex:1;min-width:0}.contribution-controls button{font-size:12px;flex-shrink:0}.contribution-section caption{text-align:left;color:var(--muted);padding:8px 0;font-size:12px}.contribution-section th,.contribution-section td{font-size:12px}.contribution-section td:first-child{width:auto}.contribution-section td:last-child{text-align:right;font-family:Consolas,monospace}.contribution-section tbody tr:last-child{font-weight:600}#otherTableImport{margin-bottom:22px}#otherTableImport summary{padding-left:0}#otherTableImport>div{padding:0 0 10px}#mismatchChoice{line-height:1.8}.inspection-controls select,.contribution-controls select{max-width:100%}@media(max-width:760px){#analysisControls,.sidebar .file-info{grid-column:1/-1}#analysisControls{display:block}.sidebar #analysisControls .divider{display:block;margin:22px 0}.sidebar #analysisControls .range-field{margin:20px 0}.sidebar #analysisControls .section-label{margin-bottom:15px}.empty-state{padding:35px 18px}.contribution-controls{flex-wrap:wrap}.contribution-controls .field{flex-basis:100%}.workflow-status{font-size:12px}.inspection-controls{gap:10px}.inspection-controls .checkbox{width:100%}}
+
+/* Level editor and deliberate manual entry. */
+.level-panel table{min-width:460px}.level-panel th:first-child{white-space:nowrap}.gamma-heading{white-space:nowrap}#levelRows .line-gamma{font-size:12px;text-align:right;white-space:nowrap;font-family:Consolas,monospace;font-variant-numeric:tabular-nums}#levelRows .line-source{color:var(--muted);font-size:10px}#levelRows .gamma-value.pos{color:var(--green)}#levelRows .gamma-value.neg{color:var(--red)}.gamma-help{padding:0 20px;margin:12px 0 0}#addLevelDialog{max-width:410px}#addLevelDialog h2{font-size:20px}#addLevelDialog .field{font-size:13px;margin:18px 0 8px}#addLevelDialog input,#addLevelDialog select{font-size:14px;min-height:44px}#addLevelDialog input[aria-invalid="true"]{border-color:var(--red)}.field-error{color:#ffb8c3;font-size:12px;min-height:19px;margin:6px 0 16px}.dialog-actions{display:flex;justify-content:flex-end;gap:12px}.dialog-actions button{min-height:44px;min-width:86px}
+
+#addLevelDialog input:not([aria-invalid="true"]){border-color:var(--border)}
+</style></head>
+<body>
+<header class="app-header"><div class="brand"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#172c26"/><path d="M10 25V10h15M10 16h9" stroke="#86dbb0" stroke-width="2.5" fill="none"/></svg><div><strong>Gamma Line Studio</strong><span>每週價位工作台</span></div><span class="version">v1.0.0</span></div><div class="header-actions"><button id="helpBtn" class="quiet">使用說明</button><button id="saveProject">儲存工作檔</button><button id="exportBtn" class="primary">匯出到 TradingView <span aria-hidden="true">↗</span></button></div></header>
+<main class="workspace">
+<aside class="sidebar" aria-label="資料與篩選設定">
+<div class="section-label">01 <span>資料來源</span></div>
+<button id="uploadBtn" class="dropzone"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><strong>載入 Gamma HTML</strong><span>點擊或拖入一份檔案</span></button><input id="files" type="file" accept=".html,.htm,.json" hidden>
+
+<div id="fileInfo" class="file-info">支援 Gamma HTML 或已儲存的工作檔。<br>載入新 Gamma 會取代目前資料並恢復預設。</div><fieldset id="analysisControls" disabled><legend class="sr-only">結算範圍與選線設定</legend>
+<div class="divider"></div><div class="section-label">02 <span>結算範圍</span></div>
+<div class="field-pair"><label class="field">起始週<select id="fromWeek"></select></label><label class="field">截止週<select id="toWeek"></select></label></div>
+<div class="segmented" aria-label="快速選取週數"><button data-horizon="4">4 週</button><button data-horizon="8">8 週</button><button data-horizon="12">12 週</button><button data-horizon="all">全部</button></div>
+<p class="hint">同週一至週五的到期日，合併成一組價位。每條線只涵蓋該結算週。</p>
+<div class="divider"></div><div class="section-label">03 <span>自動選線</span></div>
+<label class="range-field" for="topN"><span>正、負 Gamma 各取前 <output id="topNOut">3</output></span><input id="topN" type="range" min="1" max="8" value="3"></label>
+<label class="range-field" for="threshold"><span>最低相對強度 <output id="thresholdOut">20%</output></span><input id="threshold" type="range" min="0" max="100" step="5" value="20"></label>
+<label class="range-field" for="range"><span>現價上下範圍 <output id="rangeOut">30%</output></span><input id="range" type="range" min="0" max="50" step="5" value="30"></label>
+<label class="field">同向價位最小間距<input id="gap" type="number" min="0" step="0.5" value="0"></label>
+<details class="filter-help"><summary>這些設定如何選線？</summary><p>先限制價格範圍，再按正負各自的 |Gamma| 排名；只取達到強度門檻、符合間距的前幾名。</p><p><strong>最低強度：</strong>同週同向最大柱為 100%。例如 100、40、15，門檻 20% 會留下 100 和 40。</p><p><strong>價格範圍：</strong>快照現價 200、±30% 時，候選價位為 140–260。設 0 為全部；改變範圍也可能改變排名與強度分母。</p><p><strong>最小間距：</strong>以價格金額計算，只限制同向價位。例 200、202.5、205，若 200 最強且間距設 5，可保留 200、205。預設 0 保留相近大價位。</p><p>預設：正負各 3、強度 20%、範圍 ±30%、間距 0。只影響自動 Gamma 線；手動線與 Table CE 不受篩選限制。</p></details>
+<button id="resetAuto" class="full">重新選線（保留手動線）</button><button id="resetDefaults" class="full secondary-reset">恢復預設並重建選線</button><p class="hint">恢復預設會清除手動線與隱藏狀態，重建自動線與 Table CE；保留已匯入資料、CE 取值方式及結算範圍。</p>
+<div class="divider"></div><div class="section-label">04 <span>Flip / CE</span></div>
+<button id="importCE" class="full">匯入 Table · CE 與 Levels</button><label class="field">每週 CE 取值<select id="cePolicy"><option value="last">最後到期日（通常週五）</option><option value="all">保留全部到期日</option></select></label><p id="ceInfo" class="hint">尚未匯入 Table。CE 與 Level 價位一律以 Table 為準。</p>
+</fieldset><div class="local-note"><span class="status-dot"></span>本機處理，HTML 不會上傳</div>
+</aside>
+<section class="content">
+<div class="page-intro"><div><div class="eyebrow">GAMMA → WEEKLY LEVELS</div><h1>把分布，變成你的價位。</h1><p>自動挑選、逐週微調，一次畫進 TradingView。</p></div><div class="loaded-badge"><span class="status-dot"></span><span id="loadStatus">準備資料</span></div></div>
+<div id="notice" class="notice" role="status" hidden></div>
+<div id="workflowStatus" class="workflow-status" role="status" aria-live="polite" data-state="empty"></div><section id="emptyState" class="empty-state panel"><div class="eyebrow">從你的資料開始</div><h2>載入一份 Gamma HTML</h2><p>選擇 ticker 的 Gamma 檔案後，即可查看每週分布、調整價位，再匯入 Table 設定 CE。</p><button id="emptyUpload" class="primary">選取 Gamma HTML / 工作檔</button><small>一次處理一個 ticker · 原始 HTML 留在你的瀏覽器</small></section><div id="loadedContent" hidden><div class="metrics"><div><span>標的 / 資料日期</span><strong id="symbolMetric">—</strong><small id="dateMetric">—</small></div><div><span>快照現價</span><strong id="spotMetric">—</strong><small>來自 HTML，不是即時報價</small></div><div><span>結算日 → 結算週</span><strong id="weeksMetric">—</strong><small id="rangeMetric">—</small></div><div><span>已選線條</span><strong id="linesMetric">—</strong><small id="linesDetail">—</small></div></div>
+<section class="panel preview-panel"><div class="panel-heading"><div><h2>每週畫線預覽 <span class="tag">可拖曳</span></h2><p>拖曳線條調整價格，點選週標題查看分布。</p></div><div class="legend"><span class="pos">━ 正 Gamma</span><span class="neg">━ 負 Gamma</span><span class="flip">━ Flip / CE</span></div></div><div class="chart-wrap" id="chartWrap"><svg id="preview" viewBox="0 0 1000 440" role="img" aria-label="每週 Gamma 價位預覽"></svg></div><div class="chart-footer"><span id="chartCaption"></span><span>美東時間 · 週一至週五 · 週間留白</span></div></section>
+<div id="weekTabs" class="week-tabs" role="group" aria-label="選擇要編輯的結算週"></div>
+<div class="detail-grid"><section class="panel"><div class="panel-heading"><div><h2 id="distributionTitle">Gamma 分布</h2><p id="expiryCaption"></p></div><span class="tag">分布觀察</span></div><div class="inspection-controls"><label class="field">觀察到期日<select id="inspectExpiry"><option value="all">整週合併</option></select></label><label class="checkbox"><input id="inspectAll" type="checkbox">查看全部履約價</label><p id="distributionScope" class="hint"></p></div><div class="distribution-scroll"><svg id="distribution" viewBox="0 0 460 350" role="img" aria-label="選取週的 Gamma 分布"></svg></div><div class="chart-footer">點長條可加入／隱藏本週價位；顏色以整週淨 Gamma 決定。</div><div class="contribution-section"><div class="contribution-controls"><label class="field">觀察價位（不改動選線）<select id="inspectPrice"></select></label><button id="toggleInspectLevel">加入本週價位</button></div><div id="contributionDetails"></div></div></section>
+<section class="panel level-panel"><div class="panel-heading"><div><h2>價位編輯</h2><p>取消勾選可隱藏，價格與顏色可手動調整。</p></div><button id="addLevel">＋ 加線</button></div><div class="table-wrap"><table><thead><tr><th scope="col">顯示</th><th scope="col">類型</th><th scope="col">價位</th><th scope="col" class="gamma-heading">整週淨 Gamma</th><th scope="col">來源</th><th scope="col"><span class="sr-only">移除</span></th></tr></thead><tbody id="levelRows"></tbody></table></div><p class="hint gamma-help">同價位各到期日帶正負號加總；K = 千、M = 百萬。數值依原始分布，不隨線條顏色改變；— 表示無對應價位。游標停留可看完整數字。</p><div class="ce-editor"><label class="field">本週 Flip / CE<input id="weekFlip" type="number" min="0.01" step="0.5" placeholder="輸入本週價位"></label><button id="setFlip">套用黃線</button></div><p id="weekFlipNote" class="hint inset"></p></section></div>
+<details class="method panel"><summary>選線邏輯與資料來源</summary><div><p>僅讀取 HTML 中按到期日命名的 Plotly 長條資料（Gamma / GEX），不執行上傳檔案的 JavaScript。相同週、相同履約價先做帶正負號的加總，再依正負各自排序；跨到期日方向相反的 Gamma 會互相抵銷。</p><p>本工具以長條的 |Gamma| 判定「量大」，並非選擇權成交量 Volume。資料當週只代表 HTML 中仍存在的到期日，無法補回已結算的週一至週四資料。每個 HTML 是獨立快照，一次處理一份資料，不跨檔相加。</p><p>Gamma Flip、Gamma Field、Call / Put Wall 等 Level 價位一律以 Lieta Table 為準。黃色 CE 線取該週最後到期日的 Gamma_Flip，不把 CE 加總或平均；缺值留白。其他 Level 可在下方原始價位表核對。預覽是價位示意，不包含 K 線或即時行情。</p><p>匯出的 Pine 指標是靜態快照。每次更新 HTML 後重新匯出；未提供歷史當日可得資料，因此不適合作為無前視偏差的回測訊號。</p><p>參考：<a href="https://claude.ai/artifact/1DzmawhDymBEvzHMCKLhFh" target="_blank" rel="noreferrer">GEX 熱力圖生產器</a> · <a href="https://www.tradingview.com/pine-script-docs/visuals/lines-and-boxes/" target="_blank" rel="noreferrer">TradingView 畫線文件</a></p></div></details>
+<section class="panel table-reference"><div class="panel-heading"><div><h2>Table Levels · 原始價位</h2><p id="tableReferenceCaption">匯入 Table 後顯示所選週的所有到期日。CE 與 Levels 僅採用 Table。</p></div></div><div id="tableReference" class="table-wrap"><p class="empty-text">尚未匯入 Table</p></div></section></div><footer class="workspace-footer"><span>Gamma Line Studio</span><span>讀取 → 整合 → 微調 → 匯出</span></footer>
+</section></main>
+<dialog id="addLevelDialog" aria-labelledby="addLevelTitle" aria-describedby="addLevelContext">
+<form id="addLevelForm" novalidate>
+<div class="modal-heading"><h2 id="addLevelTitle">新增價位線</h2><button type="button" class="close-dialog" aria-label="關閉新增價位線">×</button></div>
+<p id="addLevelContext" class="hint"></p>
+<label class="field" for="newLevelKind">線條類型<select id="newLevelKind" name="kind"><option value="positive">＋ Gamma · 綠色</option><option value="negative">− Gamma · 紅色</option><option value="flip">Flip / CE · 黃色</option></select></label>
+<label class="field" for="newLevelPrice">價格<input id="newLevelPrice" name="price" type="number" step="any" min="0.0001" required placeholder="輸入價格" aria-describedby="newLevelError" inputmode="decimal"></label>
+<p id="newLevelError" class="field-error" role="alert"></p>
+<div class="dialog-actions"><button type="button" class="close-dialog" id="cancelAddLevel">取消</button><button type="submit" class="primary" id="confirmAddLevel">確定新增</button></div>
+</form></dialog>
+<dialog id="exportDialog"><div class="modal-heading"><div><div class="eyebrow">TRADINGVIEW EXPORT</div><h2>你的價位，準備上圖。</h2></div><button class="close-dialog" aria-label="關閉匯出視窗">×</button></div><p>在 TradingView 開啟「Pine 編輯器」，建立新指標，貼上後選擇「新增到圖表」。</p><div class="export-settings"><label class="field">股票代號<input id="symbolInput" maxlength="24"></label><label class="field">線寬<select id="lineWidth"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></label><button id="copyPine" class="primary">複製 Pine Script</button><button id="selectPine">全選程式碼</button><button id="downloadPine">下載 .pine</button></div><p id="exportStatus" role="status"></p><textarea id="pineCode" spellcheck="false" readonly aria-label="Pine Script 程式碼"></textarea><div class="modal-bottom"><span id="exportSummary"></span><button id="downloadCSV">下載價位 CSV</button></div><p class="hint">線條以美東週一至週五定位，包含夏令時間。預設畫到週五開盤，讓週與週之間留白；在指標設定關閉「週間留白」可畫到週五收盤。Pine 線條需回到本工具調整，不是 TradingView 原生可拖曳繪圖。新增指標後若看不到未來週，請將圖表向左拖出右側空間。</p></dialog>
+<dialog id="helpDialog"><div class="modal-heading"><h2>從 HTML 到 TradingView</h2><button class="close-dialog" aria-label="關閉使用說明">×</button></div><ol class="help-steps"><li><strong>載入</strong> 一份 Lieta Gamma HTML。新 Gamma 會取代目前資料，清除舊 Table 與手動線，恢復預設篩選。</li><li><strong>選結算範圍</strong>，同週多個到期日會合併。週數以曆週計算，不會把缺少到期資料的週補成有資料。</li><li><strong>觀察分布</strong>：切換整週／單一到期日，或查看全部履約價，不影響已選線。觀察價位可查看各到期日貢獻；實際加入仍採整週淨 Gamma。</li><li><strong>微調價位</strong>：點 Gamma 長條挑選、拖曳預覽線或直接輸入價格。改動自動篩選會更新自動線，手動線保留。</li><li><strong>設定黃線</strong>：在 Lieta 選 Table → 輸入相同股票 → Enter → 下載，再按「匯入 Table」。每週取最後到期日的 Gamma_Flip。</li><li><strong>匯出</strong> Pine Script，貼入 TradingView 新指標並新增到圖表。資料更新時重新匯出。</li></ol><p>「儲存工作檔」會保留資料、篩選與手動線。下次用「載入 Gamma HTML」選取該 JSON，即可恢復原有設定與觀察位置。重新整理頁面會回到空白狀態。</p><p class="hint">附件中的網頁內容只當資料解析，不會被執行或當作操作指令。</p></dialog>
+<dialog id="ceDialog"><div class="modal-heading"><div><div class="eyebrow">LIETA TABLE → CE & LEVELS</div><h2>匯入每週 CE 與 Levels</h2></div><button class="close-dialog" aria-label="關閉 CE 匯入視窗">×</button></div><p class="hint">在 <a href="https://www.lietaresearch.com/platform" target="_blank" rel="noreferrer">Lieta 平台</a> 選 Table、輸入相同股票、按 Enter 後下載。本工具以 Gamma_Flip 畫黃線，並保留 Table 的其他 Level 原始價位。</p><div class="ce-actions"><button id="pickTable" class="primary">選取 Table HTML</button><input id="tableFile" type="file" accept=".html,.htm,.csv,.tsv,.txt" hidden></div><details id="otherTableImport" class="method"><summary>其他匯入方式：CSV、貼上表格與書籤擷取</summary><div><button id="pickTableCSV">選取 CSV / TSV</button><label class="field">貼上含 Expiration 與 Gamma_Flip 的表格<textarea id="tableText" rows="5" placeholder="Expiration&#9;Gamma_Flip&#10;2026-10-09&#9;230"></textarea></label><button id="parseTable">解析貼上內容</button><p>將「<a id="ceBookmark" href="#">擷取 Lieta Table</a>」拖到瀏覽器書籤列。在 Lieta 顯示 Table 後點該書籤，會下載可見表格為 CSV，再匯入這裡。</p><p>只擷取已顯示的表格，不包含登入資訊。HTML 匯入可直接使用上方按鈕。</p></div></details><div class="field-pair"><label class="field">Table 股票代號<input id="ceSymbol" placeholder="例如 NVDA"></label><label class="field">Table 資料日期<input id="ceDate" type="date"></label></div><p id="cePreview" class="notice" role="status">尚未載入 Table。</p><label id="mismatchChoice" class="checkbox" hidden><input id="allowMismatch" type="checkbox"><span>我知道資料日期不同，仍將這份 Table 的 CE 與 Levels 套用到目前 Gamma 快照</span></label><div class="ce-actions"><button id="applyCE" class="primary" disabled>套用每週 CE 與 Levels</button></div></dialog>
+<div id="toast" role="status" class="toast" hidden></div>
+<script>(function (root) {
+  'use strict';
+  const DAY = 86400000;
+  const DEFAULT_OPTIONS = Object.freeze({ topN: 3, threshold: 20, range: 30, gap: 0 });
+  const finite = n => typeof n === 'number' && Number.isFinite(n);
+  const cleanText = s => String(s ?? '').replace(/<[^>]*>/g, '').trim();
+  function dateValid(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s)) && new Date(s).toISOString().slice(0, 10) === s; }
+  function addDays(s, n) { return new Date(Date.parse(s + 'T00:00:00Z') + n * DAY).toISOString().slice(0, 10); }
+  function monday(s) { const d = new Date(s + 'T00:00:00Z').getUTCDay(); return addDays(s, -(d + 6) % 7); }
+  function readJSON(text, offset) {
+    let i = offset; while (/[\s,]/.test(text[i] || '') && i < text.length) i++;
+    const start = i, stack = []; let quoted = false, escaped = false;
+    if (!['[', '{'].includes(text[i])) throw new Error('Plotly 資料不是可解析的 JSON。');
+    for (; i < text.length; i++) {
+      const c = text[i];
+      if (quoted) { if (escaped) escaped = false; else if (c === '\\') escaped = true; else if (c === '"') quoted = false; continue; }
+      if (c === '"') quoted = true;
+      else if (c === '[' || c === '{') stack.push(c);
+      else if (c === ']' || c === '}') { if ((stack.pop() === '[' ? ']' : '}') !== c) throw new Error('JSON 括號不完整。'); if (!stack.length) return { value: JSON.parse(text.slice(start, i + 1)), end: i + 1 }; }
+    }
+    throw new Error('HTML 資料被截斷，請重新匯出完整檔案。');
+  }
+  function numericArray(value) {
+    if (Array.isArray(value)) return value.map(v => typeof v === 'number' ? v : NaN);
+    if (!value || typeof value.bdata !== 'string') throw new Error('不支援的 Plotly 數值陣列。');
+    const type = String(value.dtype).replace(/^[<>=|]/, '');
+    const types = { f8: [8, 'getFloat64'], f4: [4, 'getFloat32'], i4: [4, 'getInt32'], u4: [4, 'getUint32'], i2: [2, 'getInt16'], u2: [2, 'getUint16'], i1: [1, 'getInt8'], u1: [1, 'getUint8'] };
+    if (!types[type]) throw new Error('不支援的 Plotly dtype：' + type);
+    const bytes = Uint8Array.from(atob(value.bdata), x => x.charCodeAt(0)), [size, method] = types[type];
+    if (bytes.length % size) throw new Error('Plotly 二進位資料長度不完整。');
+    const view = new DataView(bytes.buffer), result = [];
+    for (let i = 0; i < bytes.length; i += size) result.push(view[method](i, !String(value.dtype).startsWith('>')));
+    return result;
+  }
+  function parseHTML(text, filename = '') {
+    if (text.length > 35 * 1024 * 1024) throw new Error('單一 HTML 上限為 35 MB。');
+    const re = /Plotly\.(?:newPlot|react)\(\s*(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\s*,\s*/g;
+    let match, lastError;
+    while ((match = re.exec(text))) {
+      try {
+        const data = readJSON(text, re.lastIndex), layout = readJSON(text, data.end);
+        if (!Array.isArray(data.value)) continue;
+        if (!data.value.some(t => t.type === 'bar' && /\d{4}-\d{2}-\d{2}/.test(t.name || ''))) {
+          if (data.value.some(t => t.type === 'bar' && /^nan$/i.test(t.name || ''))) lastError = new Error('Gamma 長條的到期日標籤為 nan，無法可靠分週。請重新下載 Gamma HTML；不會用舊檔或其他日期代替。');
+          continue;
+        }
+        return normalize(data.value, layout.value, filename);
+      } catch (e) { lastError = e; }
+    }
+    throw lastError || new Error('找不到按結算日排列的 Plotly Gamma 長條資料。請載入 Lieta Gamma HTML。');
+  }
+  function normalize(traces, layout, filename) {
+    const title = cleanText(layout.title?.text || layout.title || '');
+    const symbol = (title.match(/^([A-Za-z0-9.^!:_/-]+)\s+(?:Dealers|Gamma|GEX)/i)?.[1] || filename.match(/(?:^|_)([A-Z][A-Z0-9.]{0,11})_Gamma/i)?.[1] || 'UNKNOWN').toUpperCase();
+    let spot = null, flip = null, timestamp = '';
+    for (const a of layout.annotations || []) {
+      const txt = cleanText(a.text);
+      if (/Spot Price/i.test(txt)) { const m = txt.match(/\(([\d,.]+)\)/); spot = m ? Number(m[1].replaceAll(',', '')) : a.y; }
+      if (/Flip/i.test(txt) && finite(a.y)) flip = a.y;
+      const time = txt.match(/\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}/); if (time) timestamp = time[0];
+    }
+    const expiries = [], warnings = []; let invalid = 0;
+    for (const t of traces) {
+      if (t.type !== 'bar') continue;
+      const expiry = (t.name || '').match(/\d{4}-\d{2}-\d{2}/)?.[0]; if (!expiry || !dateValid(expiry)) continue;
+      const horizontal = t.orientation !== 'v';
+      const prices = numericArray(horizontal ? t.y : t.x), gamma = numericArray(horizontal ? t.x : t.y);
+      if (prices.length !== gamma.length) throw new Error(expiry + ' 的價格與 Gamma 數量不同。');
+      const levels = [];
+      for (let i = 0; i < prices.length; i++) { if (finite(prices[i]) && prices[i] > 0 && finite(gamma[i])) levels.push({ price: prices[i], gamma: gamma[i] }); else invalid++; }
+      if (!levels.length) throw new Error(expiry + ' 沒有有效數值。');
+      expiries.push({ date: expiry, name: cleanText(t.name), monthly: /\(m\|/i.test(t.name || ''), levels });
+    }
+    if (!expiries.length) throw new Error('沒有可用的 Gamma 分布。');
+    expiries.sort((a, b) => a.date.localeCompare(b.date));
+    let asOf = timestamp.slice(0, 10) || filename.match(/\d{4}-\d{2}-\d{2}/)?.[0];
+    if (!dateValid(asOf || '')) { asOf = expiries[0].date; warnings.push('未找到資料日期，暫用第一個到期日；請核對。'); }
+    if (!finite(spot) || spot <= 0) { spot = null; warnings.push('未找到現價；現價範圍篩選停用。'); }
+    if (invalid) warnings.push(`已略過 ${invalid} 個非數字資料點。`);
+    if (symbol === 'UNKNOWN') warnings.push('未辨識股票代號，請在匯出前填寫。');
+    return { schema: 1, symbol, filename, title, asOf, timestamp, spot, flip, expiries, warnings };
+  }
+  function groupWeeks(data) {
+    const groups = new Map();
+    for (const expiry of data.expiries) {
+      if (expiry.date < data.asOf) continue;
+      const start = monday(expiry.date);
+      if (!groups.has(start)) groups.set(start, { id: start, start, end: addDays(start, 4), expiries: [], levels: new Map(), monthly: false });
+      const group = groups.get(start); group.expiries.push(expiry.date); group.monthly ||= expiry.monthly;
+      for (const l of expiry.levels) { const key = Number(l.price.toFixed(8)); const old = group.levels.get(key) || { price: key, gamma: 0, gross: 0, contributions: [] }; old.gamma += l.gamma; old.gross += Math.abs(l.gamma); old.contributions.push({ expiry: expiry.date, gamma: l.gamma }); group.levels.set(key, old); }
+    }
+    return [...groups.values()].sort((a, b) => a.start.localeCompare(b.start)).map(g => ({ ...g, expiries: [...new Set(g.expiries)].sort(), levels: [...g.levels.values()].sort((a, b) => a.price - b.price) }));
+  }
+  function selectLevels(week, spot, options = {}) {
+    const { topN = DEFAULT_OPTIONS.topN, threshold = DEFAULT_OPTIONS.threshold, range = DEFAULT_OPTIONS.range, gap = DEFAULT_OPTIONS.gap } = options;
+    const candidates = week.levels.filter(l => l.gamma !== 0 && (!spot || !range || Math.abs(l.price / spot - 1) <= range / 100 + 1e-10));
+    const chosen = [];
+    for (const sign of [1, -1]) {
+      const pool = candidates.filter(l => Math.sign(l.gamma) === sign).sort((a, b) => Math.abs(b.gamma) - Math.abs(a.gamma) || a.price - b.price);
+      const maximum = Math.abs(pool[0]?.gamma || 0), selected = [];
+      for (const level of pool) {
+        if (selected.length >= topN) break;
+        if (Math.abs(level.gamma) + 1e-8 < maximum * threshold / 100) continue;
+        if (selected.some(other => Math.abs(other.price - level.price) < gap)) continue;
+        selected.push({ ...level, kind: sign > 0 ? 'positive' : 'negative', source: 'auto', enabled: true, strength: Math.abs(level.gamma) / maximum });
+      }
+      chosen.push(...selected);
+    }
+    return chosen.sort((a, b) => b.price - a.price);
+  }
+  function gammaAtPrice(week, price) {
+    if (!finite(price) || price <= 0) return null;
+    const level = week.levels.find(l => Math.abs(l.price - price) < 1e-7);
+    return level && finite(level.gamma) ? level.gamma : null;
+  }
+  const COLORS = { positive: '#45be75', negative: '#ff4d65', flip: '#ffd23f' };
+  function pineDate(date, hour, minute) { const [y, m, d] = date.split('-').map(Number); return `timestamp("America/New_York", ${y}, ${m}, ${d}, ${hour}, ${minute})`; }
+  function exportPine(data, weeks, options = {}) {
+    const symbol = String(data.symbol).trim().toUpperCase();
+    if (!/^[A-Z0-9.^!:/_-]{1,24}$/.test(symbol) || symbol === 'UNKNOWN') throw new Error('請先填寫有效的股票代號。');
+    const lines = weeks.flatMap(w => w.drawings.filter(l => l.enabled).map(l => ({ ...l, start: w.start, end: w.end })));
+    if (!lines.length) throw new Error('請至少選取一條線。');
+    if (lines.length > 480) throw new Error('線條超過 480 條，請減少結算週或價位數。');
+    if (lines.some(l => !finite(l.price) || l.price <= 0 || !dateValid(l.start) || !dateValid(l.end) || !COLORS[l.kind])) throw new Error('匯出含有無效價位或日期。');
+    const names = { positive: 'positiveColor', negative: 'negativeColor', flip: 'flipColor' };
+    const q = JSON.stringify;
+    const tableDates = [...new Set(lines.map(l => l.source.match(/snapshot (\d{4}-\d{2}-\d{2})/)?.[1]).filter(Boolean))].sort();
+    const provenance = 'Gamma ' + data.asOf + (tableDates.length ? '\nTable ' + tableDates.join(', ') + (tableDates.some(d => d !== data.asOf) ? ' (不同快照)' : '') : '\nTable CE: 尚未匯入 / 手動線請核對');
+    const calls = lines.map(l => `    drawLevel(${pineDate(l.start, 9, 30)}, ${pineDate(l.end, 16, 0)}, ${l.price}, ${names[l.kind]}, ${q(l.kind === 'flip' ? 'Gamma Flip / CE · ' + l.source : (l.kind === 'positive' ? '+Gamma' : '-Gamma') + ' · ' + l.source)})`);
+    return `//@version=6
+// Source snapshot: ${data.asOf}. Static imported Gamma levels, not a live data feed.
+// Same-strike signed Gamma is summed within each Monday-Friday expiry week.
+// CE and named Levels come from Lieta Table; the HTML overall Flip is never substituted.
+indicator("Gamma Lines · ${symbol} · ${data.asOf}", overlay = true, max_lines_count = 500, max_labels_count = 500)
+positiveColor = input.color(color.rgb(69, 190, 117), "正 Gamma", group = "樣式")
+negativeColor = input.color(color.rgb(255, 77, 101), "負 Gamma", group = "樣式")
+flipColor = input.color(color.rgb(255, 210, 63), "Gamma Flip / CE", group = "樣式")
+lineWidth = input.int(${Math.min(6, Math.max(1, options.width || 3))}, "線寬", minval = 1, maxval = 6, group = "樣式")
+weekGap = input.bool(true, "週間留白（終點取週五開盤）", group = "樣式")
+showLabels = input.bool(true, "顯示價位", group = "樣式")
+showSource = input.bool(true, "顯示資料日期", group = "資料")
+labelSize = input.string("large", "字體大小", options = ["tiny", "small", "normal", "large"], group = "樣式")
+strictSymbol = input.bool(true, "檢查股票代號", group = "資料")
+var array<line> drawnLines = array.new<line>()
+var array<label> drawnLabels = array.new<label>()
+var table sourceTable = table.new(position.bottom_right, 1, 1)
+drawLevel(int startTime, int endTime, float price, color tint, string note) =>
+    int segmentEnd = weekGap ? endTime - 23400000 : endTime
+    array.push(drawnLines, line.new(startTime, price, segmentEnd, price, xloc = xloc.bar_time, extend = extend.none, color = tint, width = lineWidth))
+    if showLabels
+        array.push(drawnLabels, label.new(int((startTime + segmentEnd) / 2), price, str.tostring(price, format.mintick), xloc = xloc.bar_time, yloc = yloc.price, style = label.style_label_up, color = color.new(tint, 100), textcolor = tint, size = labelSize, tooltip = note))
+if barstate.islast
+    table.cell(sourceTable, 0, 0, showSource ? ${q(provenance)} : "", text_color = chart.fg_color, text_size = size.small, bgcolor = color.new(color.black, 55))
+    if strictSymbol and syminfo.ticker != "${symbol.split(':').pop()}"
+        runtime.error("請切換到 ${symbol} 圖表，或關閉代號檢查。")
+    for item in drawnLines
+        line.delete(item)
+    for item in drawnLabels
+        label.delete(item)
+    array.clear(drawnLines)
+    array.clear(drawnLabels)
+${calls.join('\n')}
+`;
+  }
+  function parseDelimited(text) {
+    const delimiter = text.includes('\t') ? '\t' : ',';
+    const rows = []; let row = [], cell = '', quote = false;
+    for (let i = 0; i <= text.length; i++) {
+      const c = text[i];
+      if (c === '"') { if (quote && text[i + 1] === '"') { cell += '"'; i++; } else quote = !quote; }
+      else if (!quote && (c === delimiter || c === '\n' || c === '\r' || c === undefined)) {
+        row.push(cell.trim()); cell = '';
+        if (c !== delimiter) { if (row.some(Boolean)) rows.push(row); row = []; if (c === '\r' && text[i + 1] === '\n') i++; }
+      } else cell += c;
+    }
+    if (quote) throw new Error('CSV 引號不完整。'); return rows;
+  }
+  function parseTable(text, filename = '') {
+    const key = s => cleanText(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+    let matrix, title = '';
+    const re = /Plotly\.(?:newPlot|react)\(\s*(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\s*,\s*/g;
+    let m;
+    while ((m = re.exec(text))) {
+      try {
+        const parsed = readJSON(text, re.lastIndex), tables = parsed.value.filter(t => t.type === 'table');
+        const table = tables.find(t => t.header?.values?.some(h => key(h) === 'gammaflip'));
+        if (!table) continue;
+        const headers = table.header.values.map(cleanText), columns = table.cells.values;
+        matrix = [headers];
+        const n = Math.max(...columns.map(c => c.length));
+        for (let i = 0; i < n; i++) matrix.push(headers.map((_, j) => cleanText(columns[j]?.[i])));
+        try { const layout = readJSON(text, parsed.end).value; title = cleanText(layout.title?.text || layout.title || ''); } catch { /* Metadata is optional. */ }
+        break;
+      } catch { /* Continue to a later Plotly figure. */ }
+    }
+    if (!matrix && /<table[\s>]/i.test(text) && typeof DOMParser !== 'undefined') {
+      const doc = new DOMParser().parseFromString(text, 'text/html');
+      matrix = [...doc.querySelectorAll('tr')].map(tr => [...tr.querySelectorAll('th,td')].map(td => td.textContent.trim()));
+    }
+    if (!matrix) matrix = parseDelimited(text.split(/\r?\n/).filter(l => !/^\s*#/.test(l)).join('\n'));
+    const headerIndex = matrix.findIndex(r => r.some(c => key(c) === 'expiration') && r.some(c => ['gammaflip','gammaflipce'].includes(key(c))));
+    if (headerIndex < 0) throw new Error('Table 必須包含 Expiration 與 Gamma_Flip 欄位。支援下載的 Table HTML、CSV 或貼上的表格。');
+    const headers = matrix[headerIndex].map(key), dateCol = headers.indexOf('expiration'), flipCol = headers.findIndex(k => ['gammaflip','gammaflipce'].includes(k)), dteCol = headers.indexOf('dte');
+    const rows = [], dateCandidates = [], warnings = [], seen = new Map();
+    for (const cells of matrix.slice(headerIndex + 1)) {
+      const date = cleanText(cells[dateCol]); if (!dateValid(date)) continue;
+      const raw = cleanText(cells[flipCol]).replaceAll(',', ''), numericFlip = Number(raw);
+      const flip = raw && finite(numericFlip) && numericFlip > 0 ? numericFlip : null;
+      if (flip === null) warnings.push(date + ' 的 Gamma_Flip 缺失，該日不畫黃線；保留其他 Levels');
+      if (seen.has(date)) { if (seen.get(date) !== flip) throw new Error(date + ' 出現兩個不同 CE，請勿混合快照。'); continue; }
+      const levels = {};
+      for (const field of ['Gamma_Field','Key_Delta','Call_Wall','Put_Wall','Call_Dominate','Put_Dominate','Pos_1Sigma','Neg_1Sigma']) {
+        const index = headers.indexOf(key(field)), rawValue = cleanText(cells[index]).replaceAll(',', ''), value = Number(rawValue);
+        if (index >= 0 && rawValue && finite(value) && value > 0) levels[field] = value;
+      }
+      seen.set(date, flip); rows.push({ date, flip, levels });
+      const dte = Number(cells[dteCol]); if (dteCol >= 0 && cells[dteCol] !== '' && Number.isInteger(dte) && dte >= 0) dateCandidates.push(addDays(date, -dte));
+    }
+    if (!rows.length) throw new Error('Table 中沒有有效的到期日 CE。');
+    const inferred = [...new Set(dateCandidates)]; if (inferred.length > 1) throw new Error('Table 的 dte 對應到不同資料日期，請檢查檔案。');
+    const explicitDate = text.match(/^#\s*asOf\s*=\s*(\d{4}-\d{2}-\d{2})/mi)?.[1];
+    const asOf = explicitDate || inferred[0] || filename.match(/\d{4}-\d{2}-\d{2}/)?.[0] || null;
+    if (explicitDate && inferred[0] && explicitDate !== inferred[0]) throw new Error('Table 標記日期與 dte 不一致。');
+    const symbol = text.match(/^#\s*symbol\s*=\s*([A-Z0-9.^!:_/-]+)/mi)?.[1]?.toUpperCase() || title.match(/^([A-Z0-9.^!:_/-]+)\s/i)?.[1]?.toUpperCase() || filename.match(/(?:^|_)([A-Z][A-Z0-9.]{0,11})_Table/i)?.[1]?.toUpperCase() || null;
+    return { rows: rows.sort((a,b) => a.date.localeCompare(b.date)), asOf, symbol, warnings, filename };
+  }
+  function weeklyCE(weeks, rows, policy = 'last') {
+    return weeks.map(w => {
+      const matches = rows.filter(r => finite(r.flip) && r.flip > 0 && r.date >= w.start && r.date <= w.end).sort((a,b) => a.date.localeCompare(b.date));
+      // Never backfill a missing Friday CE with Wednesday's value when Friday is in Gamma data.
+      const lastDate = w.expiries.at(-1);
+      return { id: w.id, rows: policy === 'all' ? matches : matches.filter(r => r.date === lastDate) };
+    });
+  }
+  function inspectionLevels(week, expiry = 'all') {
+    if (expiry === 'all') return week.levels;
+    return week.levels.filter(l => l.contributions.some(c => c.expiry === expiry)).map(l => ({ ...l,
+      gamma: l.contributions.filter(c => c.expiry === expiry).reduce((sum,c) => sum + c.gamma, 0)
+    }));
+  }
+  function resetDrawings(weeks, spot, rows = [], policy = 'last') {
+    const ce = weeklyCE(weeks, rows, policy);
+    return weeks.map(w => ({ ...w, drawings: [
+      ...selectLevels(w, spot, DEFAULT_OPTIONS),
+      ...ce.find(x => x.id === w.id).rows.map(r => ({kind:'flip', price:r.flip, enabled:true, source:`table:${r.date} / snapshot ${r.asOf || 'unknown'}`}))
+    ] }));
+  }
+  root.GammaCore = { DEFAULT_OPTIONS, gammaAtPrice, inspectionLevels, resetDrawings, parseHTML, groupWeeks, selectLevels, exportPine, readJSON, numericArray, dateValid, addDays, monday, COLORS, parseTable, weeklyCE, parseDelimited };
+  if (typeof module !== 'undefined') module.exports = root.GammaCore;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script><script>(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.GammaClipboard = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  async function copy(text, { writeText, timeoutMs = 1500 }) {
+    if (!text) return false;
+    // A pending browser permission/write must not leave the interface waiting forever.
+    // execCommand('copy') can report true without updating the embedded browser clipboard.
+    if (typeof writeText !== 'function') return false;
+    let timer;
+    try {
+      return await Promise.race([
+        Promise.resolve(writeText(text)).then(() => true, () => false),
+        new Promise(resolve => { timer = setTimeout(() => resolve(false), timeoutMs); })
+      ]);
+    } catch { return false; }
+    finally { clearTimeout(timer); }
+  }
+  return { copy };
+});
+
+(function () {
+  'use strict';
+  const C = GammaCore, $ = id => document.getElementById(id);
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const price = v => v == null ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 4 });
+  const compact = v => { const a = Math.abs(v); return (v < 0 ? '−' : '+') + (a >= 1e9 ? (a / 1e9).toFixed(2) + 'B' : a >= 1e6 ? (a / 1e6).toFixed(2) + 'M' : a >= 1e3 ? (a / 1e3).toFixed(1) + 'K' : a.toFixed(0)); };
+  const uid = () => 'l' + (++nextId); let nextId = 0, toastTimer, chartScale, drag = null;
+  const state = { data: null, weeks: [], from: '', to: '', selected: '', options: { ...C.DEFAULT_OPTIONS }, ceRows: [], cePolicy: 'last', tableMeta: null, inspection: { expiry: 'all', allPrices: false, price: null }, gammaError: '', tableError: '', busy: false };
+  function toast(s) { $('toast').textContent = s; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').hidden = true, 3300); }
+  function notice(s, error = false) { $('notice').textContent = s; $('notice').hidden = !s; $('notice').classList.toggle('error', error); }
+  function activeWeek() { return state.weeks.find(w => w.id === state.selected); }
+  function visibleWeeks() { return state.weeks.filter(w => w.start >= state.from && w.start <= state.to); }
+  function snapshot() { return { data: state.data, weeks: state.weeks, from: state.from, to: state.to, selected: state.selected, options: state.options, ceRows: state.ceRows, cePolicy: state.cePolicy, tableMeta: state.tableMeta, inspection: state.inspection }; }
+  function optionsSync() {
+    for (const k of ['topN', 'threshold', 'range', 'gap']) if(k!=='gap'||document.activeElement!==$('gap')) $(k).value = state.options[k];
+    if ($('cePolicy')) $('cePolicy').value = state.cePolicy;
+    $('topNOut').textContent = state.options.topN;
+    $('thresholdOut').textContent = state.options.threshold + '%';
+    $('rangeOut').textContent = state.options.range ? state.options.range + '%' : '全部';
+  }
+  function regenerate() {
+    if (!state.data) return;
+    for (const w of state.weeks) {
+      const manual = (w.drawings || []).filter(l => l.source !== 'auto' && l.source !== 'html-flip');
+      const auto = C.selectLevels(w, state.data.spot, state.options).filter(l => !manual.some(m => m.kind === l.kind && Math.abs(m.price - l.price) < 1e-7));
+      w.drawings = [...auto.map(l => ({ ...l, id: uid() })), ...manual];
+    }
+    render();
+  }
+  function loadData(data, session) {
+    const groups=C.groupWeeks(data);
+    if (!groups.length) throw new Error('所有到期日都早於資料日期，沒有可畫的結算週。');
+    state.data = data;
+    state.weeks = groups.map(w => ({ ...w, drawings: [] }));
+    state.ceRows = []; state.cePolicy = 'last'; state.tableMeta = null;
+    state.options = { ...C.DEFAULT_OPTIONS }; state.inspection = { expiry: 'all', allPrices: false, price: null };
+    state.gammaError = ''; state.tableError = ''; $('lineWidth').value = '3';
+    state.from = state.weeks[0].start; state.to = C.addDays(state.from, 21); state.selected = state.from;
+    if (session) {
+      Object.assign(state, { from: session.from, to: session.to, selected: session.selected, options: { ...session.options }, ceRows: session.ceRows || [], cePolicy: session.cePolicy || 'last', tableMeta: session.tableMeta || null, inspection: { ...state.inspection, ...session.inspection } });
+      for (const w of state.weeks) w.drawings = (session.weeks.find(x => x.id === w.id)?.drawings || []).filter(l=>l.source!=='html-flip').map(l => ({ ...l, id: uid() }));
+      render();
+    } else regenerate();
+    fillSelectors(); optionsSync(); render(); notice(data.warnings.join('\n'));
+    document.dispatchEvent(new Event('gamma-loaded'));
+  }
+  function fillSelectors() {
+    const opts = state.weeks.map(w => `<option value="${w.start}">${w.end.slice(5)}${w.monthly ? ' 月結' : ''}</option>`).join('');
+    $('fromWeek').innerHTML = opts; $('toWeek').innerHTML = opts;
+    const vs = visibleWeeks(); if (!vs.length) { state.from = state.weeks[0].start; state.to = state.weeks[0].start; }
+    $('fromWeek').value = state.from; $('toWeek').value = visibleWeeks().at(-1).start;
+    document.querySelectorAll('[data-horizon]').forEach(b => b.classList.toggle('active', state.from === state.weeks[0].start && (b.dataset.horizon === 'all' ? state.to === state.weeks.at(-1).start : state.to === C.addDays(state.from, (Number(b.dataset.horizon)-1)*7))));
+  }
+  function renderStatus() {
+    const output = $('workflowStatus');
+    output.dataset.state = !state.data ? 'empty' : 'gamma-ready';
+    if (state.busy) { output.dataset.state='loading'; output.textContent='正在讀取 Gamma，請稍候…'; return; }
+    const error = state.gammaError || state.tableError;
+    if (error) { output.dataset.state='error'; output.textContent='匯入失敗：'+error+(state.data?' 目前保留先前畫面供核對，匯出已停用；請重新匯入有效檔案。':' 請重新選取有效檔案。'); return; }
+    if (!state.data) { output.textContent='尚未載入資料。先匯入 Gamma HTML，再匯入相同 ticker 的 Table HTML。'; return; }
+    const dates=[...new Set(state.ceRows.map(r=>r.asOf).filter(Boolean))];
+    const vs=visibleWeeks(), mapped=C.weeklyCE(vs,state.ceRows,state.cePolicy), missing=mapped.filter(w=>!w.rows.length).map(w=>vs.find(v=>v.id===w.id).expiries.at(-1));
+    const today=new Date(), todayDate=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
+    const age=Math.round((Date.parse(todayDate)-Date.parse(state.data.asOf))/86400000);
+    const parts=[`Gamma 已載入：${state.data.symbol} · ${state.data.timestamp || state.data.asOf}`];
+    if (age>7) parts.push(`資料日期距今 ${age} 個曆日，請核對是否為你要研究的快照。`);
+    if (age<0) parts.push('Gamma 資料日期晚於本機今天日期，請核對。');
+    if (!state.ceRows.length) parts.push('Table 尚未匯入；目前可匯出 Gamma 線。');
+    else {
+      parts.push(`Table 已配對：${state.tableMeta?.filename || state.data.symbol} · ${dates.join(' / ') || '日期未記錄'}`);
+      if (dates.some(d=>d!==state.data.asOf)) parts.push('已接受 Gamma / Table 跨日配對，Pine 會標示兩份日期。');
+      parts.push(missing.length?`所選範圍缺少 Table CE：${missing.join('、')}（${state.cePolicy==='last'?'最後到期日':'該週無有效值'}）；不會自動補值。`:'所選結算週的 Table CE 已齊全。');
+      output.dataset.state=missing.length?'partial':'ready';
+    }
+    output.textContent=parts.join('\n');
+  }
+  function render() {
+    const loaded=!!state.data;
+    $('loadedContent').hidden=!loaded; $('emptyState').hidden=loaded;
+    $('analysisControls').disabled=!loaded || state.busy;
+    $('saveProject').disabled=!loaded || state.busy;
+    $('exportBtn').disabled=!loaded || state.busy || !!state.gammaError || !!state.tableError;
+    $('uploadBtn').disabled=state.busy; $('emptyUpload').disabled=state.busy;
+    optionsSync(); renderStatus();
+    if (!loaded) return;
+    const data = state.data, weeks = visibleWeeks();
+    if (!weeks.some(w => w.id === state.selected)) state.selected = weeks[0]?.id;
+    const lines = weeks.flatMap(w => w.drawings.filter(l => l.enabled));
+    $('symbolMetric').textContent = data.symbol; $('dateMetric').textContent = data.asOf;
+    $('spotMetric').textContent = price(data.spot);
+    $('weeksMetric').textContent = `${weeks.reduce((s,w) => s + w.expiries.length, 0)} → ${weeks.length}`;
+    $('rangeMetric').textContent = weeks.length ? `${weeks[0].start.slice(5)} — ${weeks.at(-1).end.slice(5)}` : '尚未選取';
+    $('linesMetric').textContent = lines.length;
+    $('linesDetail').textContent = `正 ${lines.filter(l=>l.kind==='positive').length} / 負 ${lines.filter(l=>l.kind==='negative').length} / CE ${lines.filter(l=>l.kind==='flip').length}`;
+    $('loadStatus').textContent = `${data.symbol} 已載入`;
+    $('fileInfo').textContent = `${data.filename || data.symbol + '_Gamma.html'}\n${data.timestamp || data.asOf}`;
+    const ceDates=[...new Set(state.ceRows.map(r=>r.asOf).filter(Boolean))];
+    $('ceInfo').textContent=state.ceRows.length?`Table ${ceDates.join(' / ')} · ${state.ceRows.length} 個到期日${ceDates.some(d=>d!==data.asOf)?' · 與 Gamma 日期不同':''}`:'尚未匯入 Table。CE 與 Level 價位一律以 Table 為準。';
+    $('chartCaption').textContent = `資料 ${data.asOf} · ${lines.length} 條線 · 價位示意（非 K 線）`;
+    $('weekTabs').innerHTML = weeks.map(w => `<button data-week="${w.id}" class="${w.id === state.selected ? 'active' : ''}" aria-pressed="${w.id === state.selected}">${w.end.slice(5)}${w.monthly ? ' 月結' : ''}<small>${w.expiries.length} 到期日</small></button>`).join('');
+    renderPreview(); renderDetails(); optionsSync(); document.dispatchEvent(new Event('gamma-render'));
+    $('exportBtn').disabled ||= !lines.length;
+  }
+  function renderPreview() {
+    const weeks = visibleWeeks(), data = state.data;
+    const all = weeks.flatMap(w => w.drawings.filter(l => l.enabled).map(l => l.price));
+    if (data.spot) all.push(data.spot);
+    if (!all.length) all.push(0, 100);
+    let low = Math.min(...all), high = Math.max(...all), pad = Math.max((high-low)*.14, high*.015, 1); low -= pad; high += pad;
+    const W = Math.max(1000, weeks.length * 165 + 80), H = 520, left = 35, right = W - 78, top = 52, bottom = H-42, col = (right-left)/Math.max(weeks.length,1);
+    const y = p => bottom-(p-low)/(high-low)*(bottom-top); chartScale = { low, high, top, bottom, W, H };
+    $('preview').setAttribute('viewBox', `0 0 ${W} ${H}`); $('preview').style.minWidth = Math.max(570, weeks.length*116) + 'px';
+    let out = `<rect width="${W}" height="${H}" fill="#121922"/>`;
+    for(let i=0;i<=6;i++){const p=low+(high-low)*i/6, yy=y(p);out+=`<line class="grid" x1="${left}" x2="${right}" y1="${yy}" y2="${yy}"/><text class="axis" x="${right+12}" y="${yy+4}">${price(p)}</text>`;}
+    weeks.forEach((w,i)=>{const x=left+i*col;out+=`<rect x="${x}" y="${top}" width="${col}" height="${bottom-top}" fill="${w.id===state.selected?'#88dca909':'transparent'}"/><line class="grid" x1="${x}" x2="${x}" y1="${top}" y2="${bottom}"/><text data-week="${w.id}" class="svg-week" x="${x+col/2}" y="25" fill="${w.id===state.selected?'#bcead0':'#b4c0d1'}" font-size="12" text-anchor="middle">${w.end.slice(5)}${w.monthly?' · 月结':''}</text><text class="axis" x="${x+col/2}" y="${H-13}" text-anchor="middle">${w.start.slice(5)} — ${w.end.slice(5)}</text>`;
+      const labelYs=[];
+      w.drawings.filter(l=>l.enabled).sort((a,b)=>b.price-a.price).forEach(l=>{const yy=y(l.price), color=C.COLORS[l.kind], hideLabel=l.kind==='negative'&&w.drawings.some(other=>other.enabled&&other.kind==='flip'&&Math.abs(other.price-l.price)<1e-7);let ty=yy+18;if(!hideLabel){for(const old of labelYs)if(Math.abs(ty-old)<16)ty=old+16;labelYs.push(ty);}out+=`<g class="drag-line" data-line="${l.id}" data-week="${w.id}"><title>${esc(l.kind)} ${price(l.price)} · ${esc(l.source)}${C.gammaAtPrice(w,l.price)!==null?' · 整週淨 Gamma '+compact(C.gammaAtPrice(w,l.price)):''}</title><line x1="${x+15}" x2="${x+col-15}" y1="${yy}" y2="${yy}" stroke="transparent" stroke-width="18"/><line class="visible-line" x1="${x+15}" x2="${x+col-15}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3" stroke-linecap="round"/><text visibility="${hideLabel?'hidden':'visible'}" x="${x+col/2}" y="${ty}" fill="${color}" text-anchor="middle" font-size="15" paint-order="stroke" stroke="#121922" stroke-width="4">${price(l.price)}</text></g>`;});
+    });
+    if(data.spot){const yy=y(data.spot);out+=`<line x1="${left}" x2="${right}" y1="${yy}" y2="${yy}" stroke="#7c929f" stroke-dasharray="3 5" opacity=".7"/><rect x="${right+4}" y="${yy-10}" width="70" height="21" rx="3" fill="#30484b"/><text x="${right+39}" y="${yy+4}" fill="#d6f2ed" font-size="11" text-anchor="middle">${price(data.spot)}</text>`;}
+    if(!weeks.some(w=>w.drawings.some(l=>l.enabled)))out+=`<text x="${W/2}" y="210" fill="#a4b2c4" font-size="14" text-anchor="middle">尚無符合條件的價位，可放寬篩選或手動加線</text>`;
+    $('preview').innerHTML=out;
+  }
+  function gammaCell(w,l) {
+    const gamma=C.gammaAtPrice(w,l.price);
+    const sign=gamma>0?'pos':gamma<0?'neg':'';
+    const title=gamma===null?'此週原始 Gamma 分布沒有此價位；不估算或沿用舊值。':`整週淨 Gamma：${gamma.toLocaleString('en-US',{maximumFractionDigits:20})}（同價位各到期日帶正負號加總）`;
+    return `<span class="gamma-value ${sign}" title="${esc(title)}">${gamma===null?'—':gamma===0?'0':compact(gamma)}</span>`;
+  }
+  function renderDetails() {
+    const w=activeWeek();if(!w)return;
+    if (!w.expiries.includes(state.inspection.expiry)) state.inspection.expiry='all';
+    $('inspectExpiry').innerHTML='<option value="all">整週合併</option>'+w.expiries.map(d=>`<option value="${d}">${d}</option>`).join('');
+    $('inspectExpiry').value=state.inspection.expiry; $('inspectAll').checked=state.inspection.allPrices;
+    $('distributionTitle').textContent=`${w.end.slice(5)} 結算週 · Gamma 分布`;
+    $('expiryCaption').textContent=state.inspection.expiry==='all'?'到期日 '+w.expiries.map(s=>s.slice(5)).join(' / '):'單一到期日 '+state.inspection.expiry+' · 僅切換觀察，輸出仍按週合併';
+    const rows=w.drawings.slice().sort((a,b)=>b.price-a.price);
+    const sourceName=l=>l.source==='auto'?'自動':l.source==='html-flip'?'整體 Flip':l.source.startsWith('table:')?'Table '+l.source.slice(6,16).slice(5):'手動';
+    $('levelRows').innerHTML=rows.length?rows.map(l=>`<tr data-id="${l.id}"><td><input type="checkbox" data-action="enabled" aria-label="顯示 ${price(l.price)}" ${l.enabled?'checked':''}></td><td><select data-action="kind" aria-label="${price(l.price)} 線條類型"><option value="positive" ${l.kind==='positive'?'selected':''}>＋ Gamma</option><option value="negative" ${l.kind==='negative'?'selected':''}>− Gamma</option><option value="flip" ${l.kind==='flip'?'selected':''}>Flip / CE</option></select></td><td><input type="number" min="0.0001" step="any" value="${l.price}" data-action="price" aria-label="${price(l.price)} 價位"></td><td class="line-gamma">${gammaCell(w,l)}</td><td class="line-source" title="${esc(l.source)}">${esc(sourceName(l))}</td><td><button data-action="remove" class="remove" aria-label="移除 ${price(l.price)}">×</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty-text">尚無價位，點左側長條或按「加線」。</td></tr>';
+    const ce=w.drawings.find(l=>l.kind==='flip');$('weekFlip').value=ce?.price??'';
+    $('weekFlipNote').textContent=ce?`黃線來源：${sourceName(ce)}。手動套用會取代此週既有黃線。`:'此週尚無 CE。匯入 Lieta Table，或直接填入你確認的價位。';
+    renderDistribution(w);
+  }
+  function inspectedLevels(w) {
+    return C.inspectionLevels(w,state.inspection.expiry).filter(l=>state.inspection.allPrices||!state.data.spot||!state.options.range||Math.abs(l.price/state.data.spot-1)<=state.options.range/100+1e-10).slice().sort((a,b)=>b.price-a.price);
+  }
+  function renderContribution(w,levels) {
+    if(!levels.some(l=>l.price===state.inspection.price)) state.inspection.price=levels.slice().sort((a,b)=>Math.abs(b.gamma)-Math.abs(a.gamma))[0]?.price ?? null;
+    $('inspectPrice').innerHTML=levels.map(l=>`<option value="${l.price}">${price(l.price)} · ${compact(l.gamma)}</option>`).join('');
+    $('inspectPrice').value=state.inspection.price??'';
+    const weekly=w.levels.find(l=>l.price===state.inspection.price);
+    $('toggleInspectLevel').disabled=!weekly || weekly.gamma===0;
+    $('inspectPrice').disabled=!levels.length;
+    if(!weekly){$('contributionDetails').textContent='此範圍沒有可觀察的價位。';return;}
+    const selected=w.drawings.some(l=>l.enabled&&l.kind!=='flip'&&l.price===weekly.price);
+    $('toggleInspectLevel').textContent=selected?'隱藏本週價位':'加入本週價位';
+    $('contributionDetails').innerHTML=`<table><caption>${price(weekly.price)} · 各到期日貢獻</caption><thead><tr><th>到期日</th><th>Gamma</th></tr></thead><tbody>`+w.expiries.map(d=>{
+      const parts=weekly.contributions.filter(c=>c.expiry===d),sum=parts.reduce((s,c)=>s+c.gamma,0);
+      return `<tr><td>${d}</td><td class="${sum>0?'pos':sum<0?'neg':''}">${parts.length?compact(sum):'—'}</td></tr>`;
+    }).join('')+`<tr><td>整週淨 Gamma</td><td class="${weekly.gamma>0?'pos':weekly.gamma<0?'neg':''}">${compact(weekly.gamma)}</td></tr></tbody></table>`+(weekly.gamma===0?'<p class="hint">整週正負抵銷為 0，不加入 Gamma 線。</p>':'');
+  }
+  function renderDistribution(w){
+    const levels=inspectedLevels(w);
+    const height=Math.max(350,levels.length*16+50), mid=242,max=Math.max(...levels.map(l=>Math.abs(l.gamma)),1), dy=(height-48)/Math.max(levels.length,1);
+    $('distribution').setAttribute('viewBox',`0 0 460 ${height}`);
+    let out=`<line x1="${mid}" x2="${mid}" y1="25" y2="${height-20}" stroke="#4b596a"/><text x="105" y="16" class="axis">− Gamma</text><text x="322" y="16" class="axis">+ Gamma</text>`;
+    levels.forEach((l,i)=>{const yy=30+i*dy,len=Math.abs(l.gamma)/max*155,positive=l.gamma>=0,chosen=w.drawings.some(d=>d.enabled&&d.kind!=='flip'&&Math.abs(d.price-l.price)<1e-7);out+=`<g class="distribution-bar" data-price="${l.price}" opacity="${chosen?1:.52}"><title>${price(l.price)}：${compact(l.gamma)}${chosen?'（已選）':''}</title><rect x="55" y="${yy-7}" width="360" height="${Math.max(dy,14)}" fill="transparent"/><text x="48" y="${yy+4}" fill="${chosen?'#f1f5fa':'#a3b3c6'}" font-size="11" text-anchor="end">${price(l.price)}</text><rect x="${positive?mid:mid-len}" y="${yy-5}" width="${Math.max(1,len)}" height="${Math.min(10,dy-3)}" rx="2" fill="${positive?C.COLORS.positive:C.COLORS.negative}"/><text x="${positive?mid+len+5:mid-len-5}" y="${yy+3}" fill="${positive?C.COLORS.positive:C.COLORS.negative}" font-size="9" text-anchor="${positive?'start':'end'}">${chosen?'●':''}</text></g>`;});
+    if(!levels.length)out+='<text x="230" y="180" text-anchor="middle" class="axis">此範圍沒有 Gamma 資料</text>';
+    $('distribution').innerHTML=out;
+    $('distributionScope').textContent=(state.inspection.allPrices||!state.options.range?'全部履約價':`快照現價 ±${state.options.range}%`)+` · ${levels.length} 個價位。觀察設定不改動選線；加入時採整週淨 Gamma。`;
+    renderContribution(w,levels);
+  }
+  function download(name, content, type='text/plain;charset=utf-8'){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);}
+  let copyAttempt=0;
+  function selectPineCode(){const field=$('pineCode');field.focus();field.select();field.setSelectionRange(0,field.value.length);}
+  function makeExport(){
+    copyAttempt++;$('copyPine').textContent='複製 Pine Script';
+    try{if(!state.data||state.busy||state.gammaError||state.tableError)throw new Error('請先成功載入並核對資料。');const code=C.exportPine({...state.data,symbol:$('symbolInput').value},visibleWeeks(),{width:Number($('lineWidth').value)});$('pineCode').value=code;$('exportStatus').textContent='已產生 Pine Script v6';$('copyPine').disabled=false;$('downloadPine').disabled=false;$('exportSummary').textContent=`${visibleWeeks().length} 個結算週 · ${visibleWeeks().flatMap(w=>w.drawings.filter(l=>l.enabled)).length} 條線 · 資料 ${state.data.asOf}`;}
+    catch(e){$('pineCode').value='';$('exportStatus').textContent=e.message;$('copyPine').disabled=true;$('downloadPine').disabled=true;}
+  }
+  function validateProject(p){
+    if(p.app!=='Gamma Line Studio'||p.version!==1||!p.session)throw new Error('這不是 Gamma Line Studio 工作檔。');
+    const s=p.session,d=s.data;
+    if(!d||!C.dateValid(d.asOf)||!Array.isArray(d.expiries)||d.expiries.length>500||!Array.isArray(d.warnings)||typeof d.symbol!=='string')throw new Error('工作檔的資料格式無效。');
+    for(const e of d.expiries)if(!C.dateValid(e.date)||!Array.isArray(e.levels)||e.levels.length>50000||e.levels.some(l=>!Number.isFinite(l.price)||l.price<=0||!Number.isFinite(l.gamma)))throw new Error('工作檔含無效 Gamma 數據。');
+    if(!Array.isArray(s.weeks)||s.weeks.length>500||!C.dateValid(s.from)||!C.dateValid(s.to)||s.from>s.to)throw new Error('工作檔的結算範圍無效。');
+    for(const w of s.weeks)if(!C.dateValid(w.id)||!Array.isArray(w.drawings)||w.drawings.length>500||w.drawings.some(l=>!Number.isFinite(l.price)||l.price<=0||!C.COLORS[l.kind]||typeof l.source!=='string'||typeof l.enabled!=='boolean'))throw new Error('工作檔含無效線條。');
+    for(const [k,min,max]of[['topN',1,8],['threshold',0,100],['range',0,50],['gap',0,1e9]])if(!Number.isFinite(s.options?.[k])||s.options[k]<min||s.options[k]>max)throw new Error('工作檔的篩選值無效。');
+    if(s.cePolicy && !['last','all'].includes(s.cePolicy))throw new Error('工作檔的 CE 取值方式無效。');
+    if(s.inspection && (typeof s.inspection.allPrices!=='boolean'||(s.inspection.expiry!=='all'&&!C.dateValid(s.inspection.expiry))||(s.inspection.price!==null&&(!Number.isFinite(s.inspection.price)||s.inspection.price<=0))))throw new Error('工作檔的觀察設定無效。');
+    if(s.ceRows && (!Array.isArray(s.ceRows)||s.ceRows.length>500||s.ceRows.some(r=>!C.dateValid(r.date)||(r.flip!==null&&(!Number.isFinite(r.flip)||r.flip<=0))||(r.asOf&&!C.dateValid(r.asOf)))))throw new Error('工作檔的 Table CE 格式無效。');
+    return s;
+  }
+  async function importFiles(files){
+    if(state.busy || !files.length)return;
+    if(files.length!==1){notice('一次請載入一份 Gamma HTML 或工作檔；目前工作區只處理一個 ticker。',true);return;}
+    const file=files[0];state.busy=true;render();notice('');
+    try{if(file.size>35*1024*1024)throw new Error('檔案超過 35 MB');const text=await file.text();if(/\.json$/i.test(file.name)){const s=validateProject(JSON.parse(text));loadData(s.data,s);}else loadData(C.parseHTML(text,file.name));toast(`已載入 ${state.data.symbol}${/\.json$/i.test(file.name)?' 工作檔':'，篩選已恢復預設'}`);}
+    catch(e){state.gammaError=file.name+'：'+e.message;notice(state.gammaError,true);}
+    finally{state.busy=false;$('files').value='';render();}
+  }
+  $('uploadBtn').onclick=()=>$('files').click();$('files').onchange=e=>importFiles(e.target.files);
+  $('emptyUpload').onclick=()=>$('files').click();
+  $('uploadBtn').ondragover=e=>{e.preventDefault();$('uploadBtn').classList.add('drag-over');};$('uploadBtn').ondragleave=()=>$('uploadBtn').classList.remove('drag-over');$('uploadBtn').ondrop=e=>{e.preventDefault();$('uploadBtn').classList.remove('drag-over');importFiles(e.dataTransfer.files);};
+  for(const id of ['fromWeek','toWeek'])$(id).onchange=()=>{state.from=$('fromWeek').value;state.to=$('toWeek').value;if(state.from>state.to){if(id==='fromWeek')state.to=state.from;else state.from=state.to;}fillSelectors();render();document.querySelectorAll('[data-horizon]').forEach(b=>b.classList.remove('active'));};
+  document.querySelectorAll('[data-horizon]').forEach(b=>b.onclick=()=>{state.from=state.weeks[0].start;state.to=b.dataset.horizon==='all'?state.weeks.at(-1).start:C.addDays(state.from,(Number(b.dataset.horizon)-1)*7);fillSelectors();render();document.querySelectorAll('[data-horizon]').forEach(x=>x.classList.toggle('active',x===b));});
+  for(const id of ['topN','threshold','range','gap'])$(id).onchange=()=>{const n=Number($(id).value);if(!Number.isFinite(n)||n<0){$(id).value=state.options[id];return;}state.options[id]=n;regenerate();};
+  for(const id of ['topN','threshold','range'])$(id).oninput=()=>{$(id+'Out').textContent=$(id).value+(id==='topN'?'':'%');};
+  $('gap').oninput=()=>{const raw=$('gap').value,n=Number(raw);if(raw!==''&&Number.isFinite(n)&&n>=0){state.options.gap=n;regenerate();}};
+  $('resetAuto').onclick=()=>{regenerate();toast('已更新自動線，手動調整已保留');};
+  $('resetDefaults').onclick=()=>{
+    state.options={...C.DEFAULT_OPTIONS};
+    state.weeks=C.resetDrawings(state.weeks,state.data.spot,state.ceRows,state.cePolicy).map(w=>({...w,drawings:w.drawings.map(l=>({...l,id:uid()}))}));
+    render();toast('已恢復 3 / 20% / ±30% / 0，清除手動線並依 Table 重建 CE');
+  };
+  $('weekTabs').onclick=e=>{const b=e.target.closest('[data-week]');if(b){state.selected=b.dataset.week;render();}};
+  $('preview').onclick=e=>{const target=e.target.closest('.svg-week');if(target){state.selected=target.dataset.week;render();}};
+  function togglePrice(p){const w=activeWeek(),l=w.levels.find(x=>x.price===p);state.inspection.price=p;if(!l||l.gamma===0){toast('此價位整週淨 Gamma 為 0，不加入線條');renderDetails();return;}const existing=w.drawings.find(x=>x.kind!=='flip'&&x.price===p);if(existing)existing.enabled=!existing.enabled;else w.drawings.push({...l,id:uid(),kind:l.gamma>0?'positive':'negative',source:'manual',enabled:true});render();}
+  $('distribution').onclick=e=>{const g=e.target.closest('[data-price]');if(g)togglePrice(Number(g.dataset.price));};
+  $('inspectExpiry').onchange=()=>{state.inspection.expiry=$('inspectExpiry').value;state.inspection.price=null;renderDetails();};
+  $('inspectAll').onchange=()=>{state.inspection.allPrices=$('inspectAll').checked;renderDetails();};
+  $('inspectPrice').onchange=()=>{state.inspection.price=Number($('inspectPrice').value);renderContribution(activeWeek(),inspectedLevels(activeWeek()));};
+  $('toggleInspectLevel').onclick=()=>togglePrice(state.inspection.price);
+  let addLevelWeek=null;
+  function validateNewLevel(showError=false){
+    const input=$('newLevelPrice'),raw=input.value.trim(),value=Number(raw);
+    const valid=raw!==''&&Number.isFinite(value)&&value>0;
+    if(showError){$('newLevelError').textContent=valid?'':'請輸入大於 0 的有效價格。';input.setAttribute('aria-invalid',String(!valid));}
+    return valid;
+  }
+  $('addLevel').onclick=()=>{
+    const w=activeWeek();if(!w)return;
+    addLevelWeek=w.id;$('addLevelForm').reset();$('newLevelError').textContent='';$('newLevelPrice').removeAttribute('aria-invalid');
+    $('addLevelContext').textContent=`${state.data.symbol} · ${w.end} 結算週`;
+    $('addLevelDialog').showModal();$('newLevelPrice').focus();
+  };
+  $('newLevelPrice').onblur=()=>validateNewLevel(true);
+  $('newLevelPrice').oninput=()=>{if($('newLevelPrice').getAttribute('aria-invalid')==='true')validateNewLevel(true);};
+  $('addLevelForm').onsubmit=e=>{
+    e.preventDefault();if(!validateNewLevel(true)){$('newLevelPrice').focus();return;}
+    const w=state.weeks.find(w=>w.id===addLevelWeek),kind=$('newLevelKind').value;
+    if(!w||!Object.hasOwn(C.COLORS,kind))return;
+    const value=Number($('newLevelPrice').value);
+    w.drawings.push({id:uid(),price:value,kind,source:'manual',enabled:true});
+    $('addLevelDialog').close();render();toast(`已加入 ${price(value)}，來源為手動`);
+  };
+  $('addLevelDialog').addEventListener('close',()=>{addLevelWeek=null;$('addLevel').focus();});
+  $('levelRows').onchange=e=>{const row=e.target.closest('[data-id]');if(!row)return;const l=activeWeek().drawings.find(x=>x.id===row.dataset.id),action=e.target.dataset.action;if(action==='enabled')l.enabled=e.target.checked;else if(action==='price'){const n=Number(e.target.value);if(!Number.isFinite(n)||n<=0){toast('請輸入大於 0 的有效價位');renderDetails();return;}l.price=n;l.source='manual';}else if(action==='kind'){l.kind=e.target.value;l.source='manual';}render();};
+  $('levelRows').oninput=e=>{if(e.target.dataset.action!=='price')return;const n=Number(e.target.value),row=e.target.closest('[data-id]');if(!row||!Number.isFinite(n)||n<=0)return;const w=activeWeek(),l=w.drawings.find(x=>x.id===row.dataset.id);l.price=n;l.source='manual';row.querySelector('.line-source').textContent='手動';row.querySelector('.line-source').title='manual';row.querySelector('.line-gamma').innerHTML=gammaCell(w,l);renderPreview();};
+  $('levelRows').onclick=e=>{if(e.target.dataset.action!=='remove')return;const id=e.target.closest('[data-id]').dataset.id;activeWeek().drawings=activeWeek().drawings.filter(l=>l.id!==id);render();};
+  $('setFlip').onclick=()=>{const p=Number($('weekFlip').value);if(!Number.isFinite(p)||p<=0){toast('請填入有效的 Flip / CE 價位');return;}const w=activeWeek();w.drawings=w.drawings.filter(l=>l.kind!=='flip');w.drawings.push({id:uid(),kind:'flip',price:p,source:'manual',enabled:true});render();};
+  $('preview').addEventListener('pointerdown',e=>{const g=e.target.closest('[data-line]');if(!g)return;const w=state.weeks.find(w=>w.id===g.dataset.week),l=w.drawings.find(l=>l.id===g.dataset.line);drag={week:w,line:l,scale:{...chartScale},startY:e.clientY,originalPrice:l.price,moved:false};state.selected=w.id;$('preview').setPointerCapture(e.pointerId);e.preventDefault();});
+  $('preview').addEventListener('pointermove',e=>{if(!drag)return;if(Math.abs(e.clientY-drag.startY)>2)drag.moved=true;const svg=$('preview'),point=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse()),s=drag.scale;const p=s.high-(point.y-s.top)/(s.bottom-s.top)*(s.high-s.low);drag.line.price=Math.max(.01,Math.round(p*2)/2);const g=svg.querySelector(`[data-line="${drag.line.id}"]`);if(g){const originalY=Number(g.querySelector('.visible-line').getAttribute('y1'));g.setAttribute('transform',`translate(0,${point.y-originalY})`);g.querySelector('text').textContent=price(drag.line.price);}});
+  function endDrag(){if(!drag)return;if(drag.moved){drag.line.source='manual';toast('價位已調整，可在表格精確輸入');}else drag.line.price=drag.originalPrice;drag=null;render();}
+  $('preview').addEventListener('pointerup',endDrag);$('preview').addEventListener('pointercancel',endDrag);
+  $('exportBtn').onclick=()=>{$('symbolInput').value=state.data.symbol;makeExport();$('exportDialog').showModal();};$('symbolInput').oninput=makeExport;$('lineWidth').onchange=makeExport;
+  $('copyPine').onclick=async()=>{
+    const code=$('pineCode').value,attempt=++copyAttempt;
+    if(!code)return;
+    $('copyPine').disabled=true;$('copyPine').textContent='複製中…';
+    $('exportStatus').textContent='正在複製 Pine Script…';
+    const copied=await GammaClipboard.copy(code,{
+      writeText:typeof navigator.clipboard?.writeText==='function'?text=>navigator.clipboard.writeText(text):undefined
+    });
+    if(attempt!==copyAttempt||!$('exportDialog').open)return;
+    $('copyPine').disabled=false;
+    $('copyPine').textContent=copied?'已複製 ✓':'重試複製';
+    if(copied)$('exportStatus').textContent='已複製，貼到 TradingView 的 Pine 編輯器即可';
+    else{selectPineCode();$('exportStatus').textContent='瀏覽器未完成自動複製，已全選程式碼。請按 Ctrl+C（Mac：⌘C）複製，或下載 .pine。';}
+  };
+  $('selectPine').onclick=()=>{copyAttempt++;selectPineCode();$('copyPine').disabled=!$('pineCode').value;$('copyPine').textContent='複製 Pine Script';$('exportStatus').textContent='已全選程式碼，請按 Ctrl+C（Mac：⌘C）複製';};
+  $('exportDialog').addEventListener('close',()=>{copyAttempt++;});
+  $('downloadPine').onclick=()=>download(`${$('symbolInput').value.replace(/[^A-Z0-9._-]/gi,'_')}_${state.data.asOf}_Gamma.pine`,$('pineCode').value);
+  $('downloadCSV').onclick=()=>{const rows=[['symbol','snapshot','week_start','week_end','price','kind','source','gamma']];for(const w of visibleWeeks())for(const l of w.drawings.filter(l=>l.enabled))rows.push([state.data.symbol,state.data.asOf,w.start,w.end,l.price,l.kind,l.source,C.gammaAtPrice(w,l.price)??'']);download(`${state.data.symbol}_levels.csv`,'\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(',')).join('\r\n'),'text/csv;charset=utf-8');};
+  $('saveProject').onclick=()=>download(`${state.data.symbol}_${state.data.asOf}_Gamma工作檔.json`,JSON.stringify({app:'Gamma Line Studio',version:1,session:snapshot()},null,2),'application/json');
+  $('helpBtn').onclick=()=>$('helpDialog').showModal();document.querySelectorAll('.close-dialog').forEach(b=>b.onclick=()=>b.closest('dialog').close());
+  // CE import is wired after the data-only table parser is loaded.
+  window.GammaStudio = { state, loadData, render, notice, toast, uid, activeWeek, visibleWeeks, validateProject };
+  render();
+})();
+</script>
+<script>(function(){
+  'use strict';
+  const C=GammaCore,S=GammaStudio,$=id=>document.getElementById(id);let pending=null;
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function preview(){
+    if(!pending||!S.state.data)return;
+    const symbol=$('ceSymbol').value.trim().toUpperCase(),date=$('ceDate').value,sameSymbol=symbol===S.state.data.symbol&&(!pending.symbol||pending.symbol===symbol),sameDate=date===S.state.data.asOf;
+    const matches=C.weeklyCE(S.state.weeks,pending.rows,S.state.cePolicy),covered=matches.filter(w=>w.rows.length).length;
+    const overlaps=pending.rows.some(r=>S.state.weeks.some(w=>r.date>=w.start&&r.date<=w.end));
+    $('mismatchChoice').hidden=!date||sameDate;
+    if(sameDate)$('allowMismatch').checked=false;
+    const msgs=[`已讀取 ${pending.rows.length} 個到期日，可對應 ${covered} 個結算週。`,`Gamma：${S.state.data.symbol} / ${S.state.data.asOf}；Table：${symbol||'未辨識代號'} / ${date||'未辨識日期'}`];
+    if(!sameSymbol)msgs.push('股票代號不一致：Table 必須和 Gamma 為同一股票。');
+    if(!date)msgs.push('Table 缺少日期，請填寫資料實際日期。');
+    else if(!sameDate)msgs.push('資料日期不同。若有意跨日比較，請勾選下方選項。');
+    if(covered<S.state.weeks.length)msgs.push('未匹配到最後到期日的結算週會保持空白，不用較早的 CE 補上。');
+    msgs.push(...pending.warnings);$('cePreview').textContent=msgs.join('\n');
+    if(!overlaps)msgs.push('Table 與目前 Gamma 沒有重疊的結算週，無法套用。');
+    $('cePreview').textContent=msgs.join('\n');
+    $('applyCE').disabled=!(sameSymbol&&C.dateValid(date)&&overlaps&&(sameDate||$('allowMismatch').checked));
+  }
+  function parse(text,name=''){
+    try{pending=C.parseTable(text,name);$('ceSymbol').value=pending.symbol||'';$('ceSymbol').readOnly=!!pending.symbol;$('ceDate').value=pending.asOf||'';$('ceDate').readOnly=!!pending.asOf;$('allowMismatch').checked=false;preview();}
+    catch(e){fail(e.message);}
+  }
+  function fail(message){pending=null;$('cePreview').textContent=message;$('applyCE').disabled=true;$('mismatchChoice').hidden=true;S.state.tableError=message;S.render();}
+  function applyRows(){
+    const mapped=C.weeklyCE(S.state.weeks,S.state.ceRows,S.state.cePolicy);
+    for(const w of S.state.weeks){w.drawings=w.drawings.filter(l=>!l.source.startsWith('table:'));if(w.drawings.some(l=>l.kind==='flip'&&l.source==='manual'))continue;
+      const rows=mapped.find(x=>x.id===w.id).rows;
+      for(const r of rows)w.drawings.push({id:S.uid(),kind:'flip',price:r.flip,enabled:true,source:`table:${r.date} / snapshot ${r.asOf||'unknown'}`});
+    }
+    S.render();
+  }
+  function renderReference(){
+    const week=S.activeWeek();if(!week)return;
+    const rows=S.state.ceRows.filter(r=>r.date>=week.start&&r.date<=week.end),last=week.expiries.at(-1);
+    const fields=['Gamma_Flip','Gamma_Field','Key_Delta','Call_Wall','Put_Wall','Call_Dominate','Put_Dominate','Pos_1Sigma','Neg_1Sigma'];
+    $('tableReferenceCaption').textContent=`${week.end.slice(5)} 結算週 · 黃線預設取 ${last} 的 Gamma_Flip · 其他欄位保留 Table 原值`;
+    $('tableReference').innerHTML=rows.length?'<table><thead><tr><th>Expiration</th>'+fields.map(f=>'<th>'+f+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r.date)+(r.date===last?' ●':'')+'</td>'+fields.map(f=>'<td class="'+(f==='Gamma_Flip'?'flip':'')+'">'+esc((f==='Gamma_Flip'?r.flip:r.levels?.[f])??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'<p class="empty-text">本週尚無 Table 資料，Level 價位保持空白。</p>';
+  }
+  function clearPending(){pending=null;$('tableText').value='';$('ceSymbol').value='';$('ceDate').value='';$('ceSymbol').readOnly=false;$('ceDate').readOnly=false;$('allowMismatch').checked=false;$('mismatchChoice').hidden=true;$('cePreview').textContent='尚未載入 Table。';$('applyCE').disabled=true;$('otherTableImport').open=false;}
+  $('importCE').onclick=()=>{if(!S.state.data)return;clearPending();$('ceDialog').showModal();};
+  $('pickTable').onclick=()=>{$('tableFile').accept='.html,.htm';$('tableFile').click();};
+  $('pickTableCSV').onclick=()=>{$('tableFile').accept='.csv,.tsv,.txt';$('tableFile').click();};
+  $('tableFile').onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    pending=null;$('applyCE').disabled=true;$('cePreview').textContent='正在讀取 Table…';
+    for(const id of ['pickTable','pickTableCSV','parseTable'])$(id).disabled=true;
+    try{if(f.size>35*1024*1024)throw new Error('Table 檔案上限為 35 MB。');parse(await f.text(),f.name);}
+    catch(error){fail(error.message);}
+    finally{for(const id of ['pickTable','pickTableCSV','parseTable'])$(id).disabled=false;$('tableFile').value='';}
+  };
+  $('parseTable').onclick=()=>parse($('tableText').value);
+  for(const id of ['ceSymbol','ceDate','allowMismatch'])$(id).oninput=preview;
+  $('applyCE').onclick=()=>{preview();if($('applyCE').disabled)return;S.state.ceRows=pending.rows.map(r=>({...r,asOf:$('ceDate').value}));S.state.tableMeta={filename:pending.filename||'貼上的 Table',symbol:$('ceSymbol').value.trim().toUpperCase(),asOf:$('ceDate').value};S.state.tableError='';applyRows();$('ceDialog').close();S.toast('已套用 Table CE 與 Levels，保留手動黃線');};
+  $('cePolicy').onchange=()=>{S.state.cePolicy=$('cePolicy').value;applyRows();};
+  document.addEventListener('gamma-render',renderReference);renderReference();
+  document.addEventListener('gamma-loaded',clearPending);
+  function grabTable(){
+    const cols=Array.from(document.querySelectorAll('g.y-column')).map(g=>({name:g.querySelector('[id="header"]')?.textContent,values:Array.from(g.querySelectorAll('[id="cells1"] .cell-text')).map(t=>t.textContent)})).filter(c=>c.name);
+    if(!cols.some(c=>c.name==='Expiration')||!cols.some(c=>c.name==='Gamma_Flip')){alert('請先在 Lieta 選擇 Table 並查詢股票。');return;}
+    const symbol=Array.from(document.querySelectorAll('input')).map(x=>x.value.trim()).find(x=>/^[A-Z][A-Z0-9.]{0,12}$/.test(x))||'';
+    const quote=x=>'"'+String(x??'').replaceAll('"','""')+'"';
+    const csv=(symbol?'# symbol='+symbol+'\n':'')+cols.map(c=>quote(c.name)).join(',')+'\n'+cols[0].values.map((_,i)=>cols.map(c=>quote(c.values[i])).join(',')).join('\n');
+    const a=document.createElement('a'),url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.href=url;a.download=(symbol||'Lieta')+'_Table.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+  }
+  $('ceBookmark').href='javascript:('+grabTable.toString()+')();void(0)';
+  $('ceBookmark').onclick=e=>{e.preventDefault();S.toast('請將連結拖到書籤列，再於 Lieta Table 頁面使用');};
+})();
+</script></body></html>

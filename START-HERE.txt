@@ -1,0 +1,22 @@
+Gamma Line Studio v1.0.0 — 本機使用說明
+
+1. 將 ZIP 解壓縮到自己的資料夾。
+2. 用 Chrome、Edge 或 Firefox 開啟 Gamma-Line-Studio-v1.0.0.html。
+   不需要 Codex、Node.js、帳號登入或安裝套件。
+3. 點「載入 Gamma HTML」，選取你自己的 Lieta Gamma HTML。
+4. 選擇結算範圍，匯入同 ticker 的 Table HTML，確認資料日期。
+5. 調整線條後，匯出 Pine Script，貼進 TradingView 的 Pine 編輯器。
+
+程式不附行情資料，也不會自動下載 Gamma / Table。
+已下載的資料可離線分析；取得新資料與使用 TradingView 仍需網路。
+
+複製受瀏覽器限制時，按「全選程式碼」，再按 Ctrl+C（Mac：⌘C）。
+儲存工作檔會下載 JSON；確認檔案已出現在下載資料夾，再關閉或重新整理。
+之後用「載入 Gamma HTML」選擇這份 JSON，可恢復已儲存的研究。
+若瀏覽器阻擋下載，請檢查下載權限或換用一般桌面瀏覽器。
+
+詳細說明：README.md
+專案：https://github.com/ShiaoLin/gamma-line-studio
+版本下載：https://github.com/ShiaoLin/gamma-line-studio/releases
+
+本專案目前未附開源授權。
