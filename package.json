@@ -1,6 +1,6 @@
 {
   "name": "gamma-line-studio",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Local Gamma analysis and weekly price-line editor with TradingView Pine Script export.",
   "license": "UNLICENSED",
@@ -8,7 +8,7 @@
   "scripts": {
     "build": "node build.js",
     "build:site": "node build.js --site",
-    "test": "node --test core.test.js clipboard.test.js",
+    "test": "node --test core.test.js clipboard.test.js security.test.js",
     "start": "node server.js",
     "release:package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1"
   }

@@ -270,7 +270,6 @@
   $('selectPine').onclick=()=>{copyAttempt++;selectPineCode();$('copyPine').disabled=!$('pineCode').value;$('copyPine').textContent='複製 Pine Script';$('exportStatus').textContent='已全選程式碼，請按 Ctrl+C（Mac：⌘C）複製';};
   $('exportDialog').addEventListener('close',()=>{copyAttempt++;});
   $('downloadPine').onclick=()=>download(`${$('symbolInput').value.replace(/[^A-Z0-9._-]/gi,'_')}_${state.data.asOf}_Gamma.pine`,$('pineCode').value);
-  $('downloadCSV').onclick=()=>{const rows=[['symbol','snapshot','week_start','week_end','price','kind','source','gamma']];for(const w of visibleWeeks())for(const l of w.drawings.filter(l=>l.enabled))rows.push([state.data.symbol,state.data.asOf,w.start,w.end,l.price,l.kind,l.source,C.gammaAtPrice(w,l.price)??'']);download(`${state.data.symbol}_levels.csv`,'\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(',')).join('\r\n'),'text/csv;charset=utf-8');};
   $('saveProject').onclick=()=>download(`${state.data.symbol}_${state.data.asOf}_Gamma工作檔.json`,JSON.stringify({app:'Gamma Line Studio',version:1,session:snapshot()},null,2),'application/json');
   $('helpBtn').onclick=()=>$('helpDialog').showModal();document.querySelectorAll('.close-dialog').forEach(b=>b.onclick=()=>b.closest('dialog').close());
   // CE import is wired after the data-only table parser is loaded.

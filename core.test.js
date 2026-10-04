@@ -11,13 +11,12 @@ const multiGammaHTML = plot(dates.map((date, i) => ({type:'bar',orientation:'h',
 const weeklyGammaHTML = plot(['2026-10-02','2026-10-09','2026-10-16'].map((date,i)=>({type:'bar',orientation:'v',name:date,x:[190,200,210],y:[-60-i,20,80+i]})), layout('TESTB',200,197.5));
 const headers = ['Expiration','dte','Gamma_Flip','Gamma_Field','Key_Delta','Call_Wall','Put_Wall'];
 const rows = [['Total','',98,105,95,110,90],...dates.slice(1).map(date=>[date,(Date.parse(date)-Date.parse('2026-10-04'))/86400000,date==='2026-10-16'?97.5:100,102.5,95,110,90])];
-const tableTSV = '# symbol=TESTA\n'+[headers,...rows].map(row=>row.join('\t')).join('\n');
 const tableHTML = plot([{type:'table',header:{values:headers},cells:{values:headers.map((_,i)=>rows.map(row=>row[i]))}}],{title:'TESTA Table'});
 
 
 const multi=C.parseHTML(multiGammaHTML,'TESTA_Gamma.html');
 const weekly=C.parseHTML(weeklyGammaHTML,'TESTB_Gamma.html');
-const table=C.parseTable(tableTSV);
+const table=C.parseTable(tableHTML, 'TESTA_Table.html');
 const tiny=(traces,layout={})=>'untrusted text; Plotly.newPlot("chart",'+JSON.stringify(traces)+','+JSON.stringify(layout)+');';
 test('synthetic multi-expiry HTML metadata and 13 expiries',()=>{assert.equal(multi.symbol,'TESTA');assert.equal(multi.asOf,'2026-10-02');assert.equal(multi.spot,100);assert.equal(multi.flip,98);assert.equal(multi.expiries.length,13);});
 test('synthetic vertical-bar HTML metadata',()=>{assert.equal(weekly.symbol,'TESTB');assert.equal(weekly.spot,200);assert.equal(weekly.flip,197.5);});
@@ -38,8 +37,15 @@ test('CE defaults to latest expiration, never weighted average',()=>{const mappe
 test('missing Friday CE never falls back to Wednesday',()=>{const rows=table.rows.filter(r=>r.date!=='2026-10-09');assert.equal(C.weeklyCE(C.groupWeeks(multi),rows)[1].rows.length,0);});
 test('optional all-CE mode retains all three dates',()=>{assert.equal(C.weeklyCE(C.groupWeeks(multi),table.rows,'all')[1].rows.length,3);});
 test('Plotly Table HTML imported as columns, headers stripped',()=>{const t={type:'table',header:{values:['<b>Expiration</b>','dte','<b>Gamma_Flip</b>','Call_Wall']},cells:{values:[['Total','2026-10-09'],['',5],[207.5,230],[240,235]]}};const d=C.parseTable(tiny([t]),'TESTA_Table.html');assert.equal(d.asOf,'2026-10-04');assert.equal(d.symbol,'TESTA');assert.equal(d.rows[0].levels.Call_Wall,235);});
-test('CSV quoted commas parse correctly',()=>{const d=C.parseTable('Expiration,Gamma_Flip\n2026-10-09,"1,100"');assert.equal(d.rows[0].flip,1100);});
-test('Table conflicting snapshots rejected',()=>{assert.throws(()=>C.parseTable('Expiration,Gamma_Flip\n2026-10-09,230\n2026-10-09,235'),/兩個不同/);assert.throws(()=>C.parseTable('Expiration,dte,Gamma_Flip\n2026-10-09,5,230\n2026-10-16,11,235'),/不同資料日期/);});
+test('Table rejects CSV and TSV even with an HTML filename',()=>{
+  for(const text of ['Expiration,Gamma_Flip\n2026-10-09,1100','Expiration\tGamma_Flip\n2026-10-09\t1100','<html><body>Expiration,Gamma_Flip\n2026-10-09,1100</body></html>']) assert.throws(()=>C.parseTable(text,'TEST_Table.html'),/HTML/);
+  assert.throws(()=>C.parseTable(tableHTML,'TEST_Table.csv'),/HTML/);
+});
+test('Table conflicting snapshots rejected',()=>{
+  const html=rs=>plot([{type:'table',header:{values:['Expiration','dte','Gamma_Flip']},cells:{values:[0,1,2].map(i=>rs.map(r=>r[i]))}}],{});
+  assert.throws(()=>C.parseTable(html([['2026-10-09',5,230],['2026-10-09',5,235]])),/兩個不同/);
+  assert.throws(()=>C.parseTable(html([['2026-10-09',5,230],['2026-10-16',11,235]])),/不同資料日期/);
+});
 test('Pine uses absolute time, week spans and deletes prior render',()=>{const w=C.groupWeeks(multi)[1];w.drawings=[{price:230,kind:'flip',enabled:true,source:'table:2026-10-09'}];const p=C.exportPine(multi,[w]);assert.match(p,/\/\/@version=6/);assert.match(p,/xloc = xloc.bar_time/);assert.match(p,/2026, 10, 5, 9, 30/);assert.match(p,/2026, 10, 9, 16, 0/);assert.match(p,/line.delete/);assert.match(p,/America\/New_York/);assert.doesNotMatch(p,/extend.right/);});
 test('Pine refuses invalid symbol and 481 drawings',()=>{const w={start:'2026-10-05',end:'2026-10-09',drawings:[{price:230,kind:'flip',enabled:true,source:'manual'}]};assert.throws(()=>C.exportPine({...multi,symbol:'x"\n injected'},[w]),/代號/);assert.throws(()=>C.exportPine(multi,[{...w,drawings:Array(481).fill(w.drawings[0])}]),/480/);});
 test('Pine no data fails explicitly',()=>assert.throws(()=>C.exportPine(multi,[]),/至少/));

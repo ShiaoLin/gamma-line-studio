@@ -1,24 +1,52 @@
 (function (root) {
   'use strict';
   const DAY = 86400000;
+  const MAX_TEXT = 35 * 1024 * 1024;
+  const TABLE_LIMITS = { columns: 64, rows: 10000, cells: 200000 };
+  class ImportError extends Error {}
+  function parseBudget(text) {
+    if (typeof text !== 'string' || text.length > MAX_TEXT) throw new ImportError('單一 HTML 上限為 35 MB。');
+    return { remaining: text.length * 2 + 1024, figures: 0 };
+  }
+  function spend(budget, amount = 1) {
+    budget.remaining -= amount;
+    if (budget.remaining < 0) throw new ImportError('HTML 解析超過安全上限，請重新下載完整檔案。');
+  }
+  function nextFigure(budget) {
+    if (++budget.figures > 64) throw new ImportError('HTML 圖表數量超過安全上限。');
+  }
+  function checkTableSize(columns, rows) {
+    if (columns > TABLE_LIMITS.columns || rows > TABLE_LIMITS.rows || columns * rows > TABLE_LIMITS.cells)
+      throw new ImportError('Table 超過安全上限：最多 64 欄、10,000 列及 200,000 個儲存格。');
+  }
   const DEFAULT_OPTIONS = Object.freeze({ topN: 3, threshold: 20, range: 30, gap: 0 });
   const finite = n => typeof n === 'number' && Number.isFinite(n);
-  const cleanText = s => String(s ?? '').replace(/<[^>]*>/g, '').trim();
+  function cleanText(value) {
+    const text = String(value ?? ''), parts = []; let cursor = 0, start;
+    // Advance past each complete tag; an unmatched '<' suffix is scanned only once.
+    while ((start = text.indexOf('<', cursor)) !== -1) {
+      const end = text.indexOf('>', start + 1);
+      if (end === -1) break;
+      parts.push(text.slice(cursor, start)); cursor = end + 1;
+    }
+    parts.push(text.slice(cursor)); return parts.join('').trim();
+  }
   function dateValid(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s)) && new Date(s).toISOString().slice(0, 10) === s; }
   function addDays(s, n) { return new Date(Date.parse(s + 'T00:00:00Z') + n * DAY).toISOString().slice(0, 10); }
   function monday(s) { const d = new Date(s + 'T00:00:00Z').getUTCDay(); return addDays(s, -(d + 6) % 7); }
-  function readJSON(text, offset) {
-    let i = offset; while (/[\s,]/.test(text[i] || '') && i < text.length) i++;
+  function readJSON(text, offset, budget = parseBudget(text)) {
+    let i = offset; while (i < text.length && /[\s,]/.test(text[i])) { spend(budget); i++; }
     const start = i, stack = []; let quoted = false, escaped = false;
     if (!['[', '{'].includes(text[i])) throw new Error('Plotly 資料不是可解析的 JSON。');
     for (; i < text.length; i++) {
+      spend(budget);
       const c = text[i];
       if (quoted) { if (escaped) escaped = false; else if (c === '\\') escaped = true; else if (c === '"') quoted = false; continue; }
       if (c === '"') quoted = true;
-      else if (c === '[' || c === '{') stack.push(c);
+      else if (c === '[' || c === '{') { if (stack.length >= 64) throw new ImportError('HTML JSON 巢狀層數超過安全上限。'); stack.push(c); }
       else if (c === ']' || c === '}') { if ((stack.pop() === '[' ? ']' : '}') !== c) throw new Error('JSON 括號不完整。'); if (!stack.length) return { value: JSON.parse(text.slice(start, i + 1)), end: i + 1 }; }
     }
-    throw new Error('HTML 資料被截斷，請重新匯出完整檔案。');
+    throw new ImportError('HTML 資料被截斷，請重新匯出完整檔案。');
   }
   function numericArray(value) {
     if (Array.isArray(value)) return value.map(v => typeof v === 'number' ? v : NaN);
@@ -33,19 +61,21 @@
     return result;
   }
   function parseHTML(text, filename = '') {
-    if (text.length > 35 * 1024 * 1024) throw new Error('單一 HTML 上限為 35 MB。');
+    const budget = parseBudget(text);
     const re = /Plotly\.(?:newPlot|react)\(\s*(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\s*,\s*/g;
     let match, lastError;
     while ((match = re.exec(text))) {
+      nextFigure(budget);
       try {
-        const data = readJSON(text, re.lastIndex), layout = readJSON(text, data.end);
+        const data = readJSON(text, re.lastIndex, budget), layout = readJSON(text, data.end, budget);
+        re.lastIndex = layout.end;
         if (!Array.isArray(data.value)) continue;
         if (!data.value.some(t => t.type === 'bar' && /\d{4}-\d{2}-\d{2}/.test(t.name || ''))) {
           if (data.value.some(t => t.type === 'bar' && /^nan$/i.test(t.name || ''))) lastError = new Error('Gamma 長條的到期日標籤為 nan，無法可靠分週。請重新下載 Gamma HTML；不會用舊檔或其他日期代替。');
           continue;
         }
         return normalize(data.value, layout.value, filename);
-      } catch (e) { lastError = e; }
+      } catch (e) { if (e instanceof ImportError) throw e; lastError = e; }
     }
     throw lastError || new Error('找不到按結算日排列的 Plotly Gamma 長條資料。請載入 Lieta Gamma HTML。');
   }
@@ -162,44 +192,52 @@ if barstate.islast
 ${calls.join('\n')}
 `;
   }
-  function parseDelimited(text) {
-    const delimiter = text.includes('\t') ? '\t' : ',';
-    const rows = []; let row = [], cell = '', quote = false;
-    for (let i = 0; i <= text.length; i++) {
-      const c = text[i];
-      if (c === '"') { if (quote && text[i + 1] === '"') { cell += '"'; i++; } else quote = !quote; }
-      else if (!quote && (c === delimiter || c === '\n' || c === '\r' || c === undefined)) {
-        row.push(cell.trim()); cell = '';
-        if (c !== delimiter) { if (row.some(Boolean)) rows.push(row); row = []; if (c === '\r' && text[i + 1] === '\n') i++; }
-      } else cell += c;
-    }
-    if (quote) throw new Error('CSV 引號不完整。'); return rows;
-  }
   function parseTable(text, filename = '') {
+    const budget = parseBudget(text);
+    if (filename && !/\.html?$/i.test(filename)) throw new ImportError('Table 僅接受 HTML 檔案，請下載 Lieta Table HTML。');
     const key = s => cleanText(s).toLowerCase().replace(/[^a-z0-9]/g, '');
     let matrix, title = '';
     const re = /Plotly\.(?:newPlot|react)\(\s*(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\s*,\s*/g;
     let m;
     while ((m = re.exec(text))) {
+      nextFigure(budget);
       try {
-        const parsed = readJSON(text, re.lastIndex), tables = parsed.value.filter(t => t.type === 'table');
-        const table = tables.find(t => t.header?.values?.some(h => key(h) === 'gammaflip'));
+        const parsed = readJSON(text, re.lastIndex, budget);
+        re.lastIndex = parsed.end;
+        if (!Array.isArray(parsed.value)) continue;
+        const table = parsed.value.find(t => t?.type === 'table' && Array.isArray(t.header?.values) && t.header.values.some(h => key(h) === 'gammaflip'));
         if (!table) continue;
-        const headers = table.header.values.map(cleanText), columns = table.cells.values;
+        const rawHeaders = table.header.values, columns = table.cells?.values;
+        if (!Array.isArray(columns) || !columns.every(Array.isArray))
+          throw new ImportError('Table 欄位格式無效：每一欄必須是資料陣列。');
+        const width = Math.max(rawHeaders.length, columns.length);
+        checkTableSize(width, 0);
+        let n = 0;
+        for (const column of columns) n = Math.max(n, column.length);
+        checkTableSize(width, n);
+        const headers = Array.from({ length: width }, (_, i) => cleanText(rawHeaders[i]));
         matrix = [headers];
-        const n = Math.max(...columns.map(c => c.length));
         for (let i = 0; i < n; i++) matrix.push(headers.map((_, j) => cleanText(columns[j]?.[i])));
-        try { const layout = readJSON(text, parsed.end).value; title = cleanText(layout.title?.text || layout.title || ''); } catch { /* Metadata is optional. */ }
+        try { const layout = readJSON(text, parsed.end, budget).value; title = cleanText(layout.title?.text || layout.title || ''); } catch (e) { if (e instanceof ImportError) throw e; /* Metadata is optional. */ }
         break;
-      } catch { /* Continue to a later Plotly figure. */ }
+      } catch (e) { if (e instanceof ImportError) throw e; /* Continue to a later Plotly figure. */ }
     }
     if (!matrix && /<table[\s>]/i.test(text) && typeof DOMParser !== 'undefined') {
       const doc = new DOMParser().parseFromString(text, 'text/html');
-      matrix = [...doc.querySelectorAll('tr')].map(tr => [...tr.querySelectorAll('th,td')].map(td => td.textContent.trim()));
+      const rows = doc.querySelectorAll('tr');
+      checkTableSize(0, Math.max(0, rows.length - 1));
+      matrix = []; let cellCount = 0;
+      for (const tr of rows) {
+        const cells = tr.querySelectorAll('th,td');
+        checkTableSize(cells.length, 0);
+        cellCount += cells.length;
+        if (cellCount > TABLE_LIMITS.cells) throw new ImportError('Table 儲存格數超過安全上限。');
+        matrix.push([...cells].map(td => td.textContent.trim()));
+      }
     }
-    if (!matrix) matrix = parseDelimited(text.split(/\r?\n/).filter(l => !/^\s*#/.test(l)).join('\n'));
+    if (!matrix) throw new ImportError('找不到 Table HTML 資料，請下載 Lieta Table HTML；不支援 CSV、TSV 或純文字。');
     const headerIndex = matrix.findIndex(r => r.some(c => key(c) === 'expiration') && r.some(c => ['gammaflip','gammaflipce'].includes(key(c))));
-    if (headerIndex < 0) throw new Error('Table 必須包含 Expiration 與 Gamma_Flip 欄位。支援下載的 Table HTML、CSV 或貼上的表格。');
+    if (headerIndex < 0) throw new Error('Table HTML 必須包含 Expiration 與 Gamma_Flip 欄位。');
     const headers = matrix[headerIndex].map(key), dateCol = headers.indexOf('expiration'), flipCol = headers.findIndex(k => ['gammaflip','gammaflipce'].includes(k)), dteCol = headers.indexOf('dte');
     const rows = [], dateCandidates = [], warnings = [], seen = new Map();
     for (const cells of matrix.slice(headerIndex + 1)) {
@@ -245,6 +283,6 @@ ${calls.join('\n')}
       ...ce.find(x => x.id === w.id).rows.map(r => ({kind:'flip', price:r.flip, enabled:true, source:`table:${r.date} / snapshot ${r.asOf || 'unknown'}`}))
     ] }));
   }
-  root.GammaCore = { DEFAULT_OPTIONS, gammaAtPrice, inspectionLevels, resetDrawings, parseHTML, groupWeeks, selectLevels, exportPine, readJSON, numericArray, dateValid, addDays, monday, COLORS, parseTable, weeklyCE, parseDelimited };
+  root.GammaCore = { DEFAULT_OPTIONS, gammaAtPrice, inspectionLevels, resetDrawings, parseHTML, groupWeeks, selectLevels, exportPine, readJSON, numericArray, dateValid, addDays, monday, COLORS, parseTable, weeklyCE };
   if (typeof module !== 'undefined') module.exports = root.GammaCore;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
