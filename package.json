@@ -7,6 +7,7 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "build": "node build.js",
+    "build:site": "node build.js --site",
     "test": "node --test core.test.js clipboard.test.js",
     "start": "node server.js",
     "release:package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1"

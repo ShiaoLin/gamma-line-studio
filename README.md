@@ -2,7 +2,15 @@
 
 將 Lieta Gamma 分布整理成每週價位，手動微調後匯出 TradingView Pine Script。支援正負 Gamma 選線、Table CE / Levels、結算範圍與工作檔保存。
 
-**下載後直接在本機瀏覽器使用，不需要 Codex，也不需要安裝套件。** 匯入檔案在瀏覽器內解析，不會上傳伺服器；專案與下載包均不附真實行情或私人工作檔。
+**[直接開啟線上工作台](https://shiaolin.github.io/gamma-line-studio/)** · [下載離線版](https://github.com/ShiaoLin/gamma-line-studio/releases/latest)
+
+不需要 Codex，也不需要安裝套件。線上版與離線版均在使用者自己的瀏覽器內解析匯入檔案，不會上傳 Gamma / Table / 工作檔；專案與下載包不附真實行情或私人工作檔。
+
+## 線上使用
+
+開啟 [Gamma Line Studio](https://shiaolin.github.io/gamma-line-studio/)，選取自己的 Gamma HTML，再視需要匯入 Table HTML。分析與編輯功能和離線版相同；網站不會自動取得行情，也不會將研究同步到雲端。
+
+開啟網站需要網路；要穩定離線使用，請保留 Release 的單檔 HTML。重新整理或關閉前，仍需自行儲存工作檔，並確認 JSON 已下載。
 
 ## 下載與開始使用
 
@@ -54,6 +62,12 @@
 
 ## 維護與版本發布
 
+程式更新持續提交至本 GitHub 專案做版本控制。推送到 `main` 後，GitHub Actions 會先執行測試、建置並核對單檔 HTML；全部通過才部署至 GitHub Pages。Pull Request 只執行檢查，不部署。設定見 `.github/workflows/pages.yml`。
+
+網站只發布 `_site/index.html` 與 `.nojekyll`，不將整個程式庫或本機資料夾作為網站根目錄。GitHub 專案的 Pages 來源設定為 **GitHub Actions**。可在 Actions 查看每次發布結果；失敗時既有網站保留上一個成功版本。必要時回復程式提交，再經同一流程重新發布。
+
+網站更新與 Release 分開：網站隨通過檢查的 `main` 更新；正式離線版本另外建立標籤與 Release，保留舊版下載，不覆蓋已發布的檔案。
+
 開發需 Node.js 22 以上，無須執行套件安裝：
 
 ```sh
@@ -61,6 +75,8 @@ node --test core.test.js clipboard.test.js
 node build.js
 node server.js
 ```
+
+用 `npm run build:site` 產生網站檔案；此指令同時重建單檔 HTML。若修改程式，請一併提交重建後的 `Gamma價位工作台.html`。`_site/` 是產物，不納入版本控制。
 
 測試程式只使用程式內的人工數值，不依賴或附帶真實行情資料。
 

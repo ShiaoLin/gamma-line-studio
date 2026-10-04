@@ -2,6 +2,7 @@
 analysis/
 samples/
 dist/
+_site/
 node_modules/
 *.log
 *.pine

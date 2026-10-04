@@ -9,3 +9,13 @@ html = html.replace('/* STYLES */', () => fs.readFileSync(path.join(root, 'style
 if (fs.existsSync(path.join(root, 'table.js'))) html = html.replace('</body>', '<script>' + safeScript(fs.readFileSync(path.join(root, 'table.js'), 'utf8')) + '</script></body>');
 fs.writeFileSync(path.join(root, 'Gamma價位工作台.html'), html);
 console.log('Built standalone app:', Buffer.byteLength(html), 'bytes');
+if (process.argv.includes('--site')) {
+  // Publish only the standalone app, never the repository or local user files.
+  const site = path.join(root, '_site');
+  fs.mkdirSync(site, { recursive: true });
+  const unexpected = fs.readdirSync(site).filter(name => !['index.html', '.nojekyll'].includes(name));
+  if (unexpected.length) throw new Error('Unexpected files in _site; refusing to publish: ' + unexpected.join(', '));
+  fs.writeFileSync(path.join(site, 'index.html'), html);
+  fs.writeFileSync(path.join(site, '.nojekyll'), '');
+  console.log('Built website: _site/index.html');
+}
