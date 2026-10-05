@@ -20,10 +20,22 @@
     $('applyCE').disabled=!(sameSymbol&&C.dateValid(date)&&overlaps&&(sameDate||$('allowMismatch').checked));
   }
   function parse(text,name=''){
-    try{pending=C.parseTable(text,name);$('ceSymbol').value=pending.symbol||'';$('ceSymbol').readOnly=!!pending.symbol;$('ceDate').value=pending.asOf||'';$('ceDate').readOnly=!!pending.asOf;$('allowMismatch').checked=false;preview();}
+    try{
+      pending=C.parseTable(text,name);$('ceSymbol').value=pending.symbol||'';$('ceSymbol').readOnly=!!pending.symbol;$('ceDate').value=pending.asOf||'';$('ceDate').readOnly=!!pending.asOf;$('allowMismatch').checked=false;
+      $('ceFields').hidden=false;$('applyCE').hidden=false;preview();
+      if(!$('applyCE').disabled)commitTable();
+      else{S.state.tableError='Table 尚未套用，請在載入區下方核對代號、日期與結算週。';S.render();}
+    }
     catch(e){fail(e.message);}
   }
-  function fail(message){pending=null;$('cePreview').textContent=message;$('applyCE').disabled=true;$('mismatchChoice').hidden=true;S.state.tableError=message;S.render();}
+  function fail(message){pending=null;$('ceReview').hidden=false;$('ceFields').hidden=true;$('cePreview').textContent=message;$('applyCE').disabled=true;$('applyCE').hidden=true;$('mismatchChoice').hidden=true;S.state.tableError=message;S.render();}
+  function commitTable(){
+    preview();if($('applyCE').disabled)return;
+    S.state.ceRows=pending.rows.map(r=>({...r,asOf:$('ceDate').value}));
+    S.state.tableMeta={filename:pending.filename||'Table HTML',symbol:$('ceSymbol').value.trim().toUpperCase(),asOf:$('ceDate').value};
+    S.state.tableError='';pending=null;$('applyCE').disabled=true;$('ceReview').hidden=true;
+    applyRows();S.toast('已載入 Table，更新 CE 與 Levels，保留手動黃線');
+  }
   function applyRows(){
     const mapped=C.weeklyCE(S.state.weeks,S.state.ceRows,S.state.cePolicy);
     for(const w of S.state.weeks){w.drawings=w.drawings.filter(l=>!l.source.startsWith('table:'));if(w.drawings.some(l=>l.kind==='flip'&&l.source==='manual'))continue;
@@ -39,16 +51,16 @@
     $('tableReferenceCaption').textContent=`${week.end.slice(5)} 結算週 · 黃線預設取 ${last} 的 Gamma_Flip · 其他欄位保留 Table 原值`;
     $('tableReference').innerHTML=rows.length?'<table><thead><tr><th>Expiration</th>'+fields.map(f=>'<th>'+f+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r.date)+(r.date===last?' ●':'')+'</td>'+fields.map(f=>'<td class="'+(f==='Gamma_Flip'?'flip':'')+'">'+esc((f==='Gamma_Flip'?r.flip:r.levels?.[f])??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'<p class="empty-text">本週尚無 Table 資料，Level 價位保持空白。</p>';
   }
-  function clearPending(){readId++;reading=false;pending=null;$('importCE').disabled=false;$('pickTable').disabled=false;$('tableFile').value='';$('ceSymbol').value='';$('ceDate').value='';$('ceSymbol').readOnly=false;$('ceDate').readOnly=false;$('allowMismatch').checked=false;$('mismatchChoice').hidden=true;$('cePreview').textContent='尚未載入 Table。';$('applyCE').disabled=true;}
+  function clearPending(){readId++;reading=false;pending=null;$('importCE').disabled=false;$('tableFile').value='';$('ceReview').hidden=true;$('ceFields').hidden=true;$('ceSymbol').value='';$('ceDate').value='';$('ceSymbol').readOnly=false;$('ceDate').readOnly=false;$('allowMismatch').checked=false;$('mismatchChoice').hidden=true;$('cePreview').textContent='尚未載入 Table。';$('applyCE').disabled=true;$('applyCE').hidden=true;}
   function pickTable(){if(!S.state.data||S.state.busy||reading)return;clearPending();$('tableFile').click();}
   async function importTable(files){
     const selected=Array.from(files);
     if(!selected.length||reading||S.state.busy)return;
     if(!S.state.data){S.toast('請先載入 Gamma HTML，再匯入相同 ticker 的 Table。');return;}
-    clearPending();$('ceDialog').showModal();
+    clearPending();$('ceReview').hidden=false;
     if(selected.length!==1){fail('一次請載入一份 Table HTML。');return;}
     const f=selected[0],request=++readId,gamma=S.state.data;reading=true;
-    $('cePreview').textContent='正在讀取 Table…';$('importCE').disabled=true;$('pickTable').disabled=true;
+    $('cePreview').textContent='正在讀取 Table…';$('importCE').disabled=true;
     try{
       if(!/\.html?$/i.test(f.name))throw new Error('Table 僅接受 HTML 檔案。');
       if(f.size>35*1024*1024)throw new Error('Table 檔案上限為 35 MB。');
@@ -56,15 +68,15 @@
       if(request!==readId||gamma!==S.state.data||S.state.busy)return;
       parse(text,f.name);
     }catch(error){if(request===readId&&gamma===S.state.data&&!S.state.busy)fail(error.message);}
-    finally{if(request===readId){reading=false;$('importCE').disabled=false;$('pickTable').disabled=false;$('tableFile').value='';}}
+    finally{if(request===readId){reading=false;$('importCE').disabled=false;$('tableFile').value='';}}
   }
-  $('importCE').onclick=pickTable;$('pickTable').onclick=pickTable;
+  $('importCE').onclick=pickTable;
   $('tableFile').onchange=e=>importTable(e.target.files);
   $('importCE').ondragover=e=>{e.preventDefault();if(S.state.data&&!S.state.busy&&!reading)$('importCE').classList.add('drag-over');};
   $('importCE').ondragleave=()=>$('importCE').classList.remove('drag-over');
   $('importCE').ondrop=e=>{e.preventDefault();$('importCE').classList.remove('drag-over');return importTable(e.dataTransfer.files);};
   for(const id of ['ceSymbol','ceDate','allowMismatch'])$(id).oninput=preview;
-  $('applyCE').onclick=()=>{preview();if($('applyCE').disabled)return;S.state.ceRows=pending.rows.map(r=>({...r,asOf:$('ceDate').value}));S.state.tableMeta={filename:pending.filename||'Table HTML',symbol:$('ceSymbol').value.trim().toUpperCase(),asOf:$('ceDate').value};S.state.tableError='';applyRows();$('ceDialog').close();S.toast('已套用 Table CE 與 Levels，保留手動黃線');};
+  $('applyCE').onclick=commitTable;
   $('cePolicy').onchange=()=>{S.state.cePolicy=$('cePolicy').value;applyRows();};
   document.addEventListener('gamma-render',renderReference);renderReference();
   document.addEventListener('gamma-loaded',clearPending);

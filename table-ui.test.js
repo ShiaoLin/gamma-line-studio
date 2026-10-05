@@ -17,14 +17,14 @@ function setup(){
 }
 test('Table click opens the picker directly; cancelling leaves existing lines alone',()=>{
   const h=setup();h.state.weeks[0].drawings=[{price:101,kind:'positive',source:'manual',enabled:true}];
-  h.element('importCE').onclick();assert.equal(h.element('tableFile').clicks,1);assert.equal(h.element('ceDialog').open,false);
+  h.element('importCE').onclick();assert.equal(h.element('tableFile').clicks,1);assert.equal(h.element('ceReview').hidden,true);
   assert.equal(h.state.weeks[0].drawings[0].price,101);assert.equal(h.state.tableError,'');
 });
-test('picker and drop share Table validation and require confirmation; both CE policies remain',async()=>{
+test('matching Table applies immediately from picker or drop; both CE policies remain',async()=>{
   for(const route of ['choose','drop']){
     const h=setup();await h[route]([file()]);
-    assert.equal(h.element('ceDialog').open,true);assert.equal(h.element('applyCE').disabled,false);assert.equal(h.state.ceRows.length,0);
-    h.element('applyCE').onclick();assert.equal(h.state.ceRows.length,2);assert.equal(h.state.weeks[0].drawings.length,1);assert.equal(h.state.weeks[0].drawings[0].price,100);
+    assert.equal(h.element('ceReview').hidden,true);assert.equal(h.state.ceRows.length,2);assert.equal(h.state.tableError,'');
+    assert.equal(h.state.weeks[0].drawings.length,1);assert.equal(h.state.weeks[0].drawings[0].price,100);
     h.element('cePolicy').value='all';h.element('cePolicy').onchange();assert.equal(h.state.weeks[0].drawings.length,2);
   }
 });
@@ -38,13 +38,29 @@ test('clearing a live file input does not erase the selected file before reading
   const h=setup(),files=[file()];
   Object.defineProperty(h.element('tableFile'),'value',{get:()=>'',set:()=>{files.length=0;}});
   await h.choose(files);
-  assert.equal(files.length,0);assert.equal(h.element('applyCE').disabled,false);assert.match(h.element('cePreview').textContent,/已讀取 2/);
+  assert.equal(files.length,0);assert.equal(h.state.ceRows.length,2);assert.equal(h.element('ceReview').hidden,true);
 });
 test('Table mismatch checks still apply after drop and explicit cross-date consent is required',async()=>{
   const h=setup();h.state.data.asOf='2026-10-04';await h.drop([file()]);
+  assert.equal(h.element('ceReview').hidden,false);assert.equal(h.state.ceRows.length,0);assert.ok(h.state.tableError);
   assert.equal(h.element('applyCE').disabled,true);h.element('allowMismatch').checked=true;h.element('allowMismatch').oninput();
   assert.equal(h.element('applyCE').disabled,false);
+  h.element('applyCE').onclick();assert.equal(h.state.ceRows[0].asOf,'2026-10-05');assert.equal(h.state.tableError,'');assert.equal(h.element('ceReview').hidden,true);
   const other=setup();other.state.data.symbol='OTHER';await other.drop([file()]);assert.equal(other.element('applyCE').disabled,true);
+});
+test('missing metadata can be completed inline; unrelated weeks cannot be auto-applied',async()=>{
+  const h=setup();const noMeta=html.replace(',"dte"','').replace('[2,4],','').replace('TEST Table','');
+  await h.drop([{name:'Table.html',size:noMeta.length,text:async()=>noMeta}]);
+  assert.equal(h.state.ceRows.length,0);assert.equal(h.element('ceFields').hidden,false);
+  h.element('ceSymbol').value='TEST';h.element('ceDate').value='2026-10-05';h.element('ceDate').oninput();h.element('applyCE').onclick();
+  assert.equal(h.state.ceRows.length,2);
+  const other=setup();other.state.weeks[0].start='2026-11-02';other.state.weeks[0].end='2026-11-06';await other.drop([file()]);
+  assert.equal(other.state.ceRows.length,0);assert.equal(other.element('applyCE').disabled,true);
+});
+test('auto-import replaces Table lines but preserves manual CE and never opens a dialog',async()=>{
+  const h=setup();h.state.weeks[0].drawings=[{price:101,kind:'flip',source:'manual',enabled:true},{price:98,kind:'flip',source:'table:old',enabled:true}];
+  await h.drop([file()]);assert.equal(h.state.weeks[0].drawings.length,1);assert.equal(h.state.weeks[0].drawings[0].price,101);
+  assert.doesNotMatch(tableScript,/showModal|ceDialog/);assert.doesNotMatch(fs.readFileSync(__dirname+'/shell.html','utf8'),/id="ceDialog"/);
 });
 test('a pending Table read cannot populate a newly loaded Gamma session',async()=>{
   const h=setup();let finish;
