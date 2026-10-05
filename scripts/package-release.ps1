@@ -5,7 +5,7 @@ $version = $package.version
 if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid release version.' }
 Push-Location -LiteralPath $projectRoot
 try {
-    & node --test core.test.js clipboard.test.js security.test.js
+    & node --test core.test.js clipboard.test.js security.test.js table-ui.test.js
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
     & node build.js
     if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }

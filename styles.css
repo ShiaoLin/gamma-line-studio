@@ -9,3 +9,5 @@
 .level-panel table{min-width:460px}.level-panel th:first-child{white-space:nowrap}.gamma-heading{white-space:nowrap}#levelRows .line-gamma{font-size:12px;text-align:right;white-space:nowrap;font-family:Consolas,monospace;font-variant-numeric:tabular-nums}#levelRows .line-source{color:var(--muted);font-size:10px}#levelRows .gamma-value.pos{color:var(--green)}#levelRows .gamma-value.neg{color:var(--red)}.gamma-help{padding:0 20px;margin:12px 0 0}#addLevelDialog{max-width:410px}#addLevelDialog h2{font-size:20px}#addLevelDialog .field{font-size:13px;margin:18px 0 8px}#addLevelDialog input,#addLevelDialog select{font-size:14px;min-height:44px}#addLevelDialog input[aria-invalid="true"]{border-color:var(--red)}.field-error{color:#ffb8c3;font-size:12px;min-height:19px;margin:6px 0 16px}.dialog-actions{display:flex;justify-content:flex-end;gap:12px}.dialog-actions button{min-height:44px;min-width:86px}
 
 #addLevelDialog input:not([aria-invalid="true"]){border-color:var(--border)}
+
+#levelText{width:100%;min-height:108px;resize:vertical;font:12px/1.7 Consolas,"Microsoft JhengHei",monospace;overflow-wrap:anywhere}

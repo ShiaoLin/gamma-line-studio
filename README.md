@@ -14,8 +14,8 @@
 
 ## 下載與開始使用
 
-1. 前往 [最新 Release](https://github.com/ShiaoLin/gamma-line-studio/releases/latest)，下載 `Gamma-Line-Studio-v1.1.0.zip` 並解壓縮。也可只下載 Release 中的單一 HTML。
-2. 用 Chrome、Edge 或 Firefox 開啟 `Gamma-Line-Studio-v1.1.0.html`。原始碼目錄內的建置結果名為 **Gamma價位工作台.html**。
+1. 前往 [最新 Release](https://github.com/ShiaoLin/gamma-line-studio/releases/latest)，下載 `Gamma-Line-Studio-v1.2.0.zip` 並解壓縮。也可只下載 Release 中的單一 HTML。
+2. 用 Chrome、Edge 或 Firefox 開啟 `Gamma-Line-Studio-v1.2.0.html`。原始碼目錄內的建置結果名為 **Gamma價位工作台.html**。
 3. 準備自己的 Gamma HTML；如需黃線與 Levels，再準備相同 ticker 的 Table HTML。
 
 分析已下載資料可離線進行。取得新行情與在 TradingView 使用指標仍需網路。本專案沒有背景抓取或自動更新資料。
@@ -27,12 +27,13 @@
 1. 載入一份 Lieta Gamma HTML。一次處理一個 ticker；新 Gamma 會取代目前資料、清除舊 Table 與手動線，並恢復預設篩選。頁面不內建資料，重新開啟或整理會回到等待匯入狀態。
 2. 選擇起始／截止結算週，或快速選 4、8、12 週。
 3. 預設正負各取最多 3 條、最低相對強度 20%、快照現價上下 ±30%、同向最小間距 0。相近的大價位都保留；各設定的說明與範例可在「這些設定如何選線？」展開查看。
-4. 進入 [Lieta 平台](https://www.lietaresearch.com/platform)，模型選 Table，輸入相同 ticker 後按 Enter。下載 Table HTML，再按工作台的「匯入 Table · CE 與 Levels」。Table 僅接受 HTML；不提供 CSV / TSV、貼上文字與書籤擷取。只有資料日期不同時才顯示跨日配對選項。
+4. 進入 [Lieta 平台](https://www.lietaresearch.com/platform)，模型選 Table，輸入相同 ticker 後按 Enter。下載 Table HTML，點擊工作台的「載入 Table HTML」選檔，或直接拖入該區塊。選檔後核對代號、日期及結算週，再按套用。Table 僅接受 HTML；不提供 CSV / TSV、貼上表格解析與書籤擷取。只有資料日期不同時才顯示跨日配對選項。
 5. **Gamma Flip、Gamma Field、Call/Put Wall 等 Level 值以 Table 為準**。每週黃色線預設採該週最後到期日的 Gamma_Flip；若星期五沒有交易而最後到期在星期四，取星期四。缺少最後到期日 CE 時留白，不拿其他日期或 HTML 整體 Flip 補值。其他 Table Levels 顯示於核對表，不擅自指派正負 Gamma 色。
 6. 可切換整週／單一到期日分布、勾選「查看全部履約價」，並用「觀察價位」查看各到期日的 Gamma 貢獻。這些觀察設定不改動選線。點分布長條或按「加入／隱藏本週價位」才會變更繪圖，加入的方向仍依整週淨 Gamma；整週抵銷為 0 不加入線條。
 7. 按「＋ 加線」後，在小視窗選擇正 Gamma／負 Gamma／Flip CE，輸入價格並按「確定新增」。取消、關閉或 Esc 都不新增；空白與非正數不接受。也可拖曳線條或輸入精確價格。拖曳以 0.5 為間距；數字欄可輸入任意正數。手動變更標示為「手動」。「重新選線」保留手動線；「恢復預設並重建選線」將四項篩選恢復預設，清除手動線與隱藏狀態，並重新套用 Table CE。資料、結算範圍與 CE 取值方式保留。
 8. 按「匯出到 TradingView」，複製 Pine Script，在 Pine 編輯器新建指標、貼上並新增到圖表。價位標籤預設為 Large，可在指標設定調整。複製按鈕會顯示進度與完成結果；瀏覽器超過 1.5 秒未完成時，全選程式碼並提示按 Ctrl+C（Mac：⌘C）。也可直接按「全選程式碼」，或下載 .pine。
-9. 「儲存工作檔」下載 JSON；下次用載入按鈕開啟，可恢復手動線、Table、篩選、週別與觀察設定。也支援舊版工作檔。
+9. 每週 CE 取值下的「Level 文字（暫存）」可貼上長文字（最多 50,000 字元），目前只保存文字，不解析、不畫線，也不加入 Pine。載入新 Gamma 會清空，調整篩選或重新選線則保留。
+10. 「儲存工作檔」下載 JSON；下次用載入按鈕開啟，可恢復手動線、Table、Level 文字、篩選、週別與觀察設定。也支援舊版工作檔。歷史線保留／鎖定更新尚未實作，新 Gamma 仍會取代目前資料。
 
 ## 資料規則
 
@@ -57,7 +58,7 @@
 
 ## 開發與驗證
 
-無第三方執行期依賴。`node build.js` 由 core.js、clipboard.js、app.js、table.js、shell.html 與 styles.css 重建單一 HTML。`node --test core.test.js clipboard.test.js security.test.js` 驗證資料解析、週分組、符號、CE 選取、錯誤處理、Pine 輸出及複製成功／拒絕／逾時。`node server.js` 可在本機 `http://127.0.0.1:8765` 開啟，僅監聽本機。
+無第三方執行期依賴。`node build.js` 由 core.js、clipboard.js、app.js、table.js、shell.html 與 styles.css 重建單一 HTML。`node --test core.test.js clipboard.test.js security.test.js table-ui.test.js` 驗證資料解析、週分組、符號、CE 選取、錯誤處理、Pine 輸出及複製成功／拒絕／逾時。`node server.js` 可在本機 `http://127.0.0.1:8765` 開啟，僅監聽本機。
 
 介面參考 [GEX 熱力圖生產器](https://claude.ai/artifact/1DzmawhDymBEvzHMCKLhFh)。主要差異：用每週獨立水平線取代熱力區塊；顏色依 Gamma 正負；同週短到期合併；Table CE 與 Level 保留來源；支援手動拖曳與工作檔保存。
 
@@ -73,7 +74,7 @@
 開發需 Node.js 22 以上，無須執行套件安裝：
 
 ```sh
-node --test core.test.js clipboard.test.js security.test.js
+node --test core.test.js clipboard.test.js security.test.js table-ui.test.js
 node build.js
 node server.js
 ```
@@ -98,7 +99,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1
 | core.js | Gamma / Table 解析、週分組、選線與 Pine 匯出 |
 | app.js / table.js / clipboard.js | 操作介面、Table 配對與複製 |
 | shell.html / styles.css / build.js | 頁面模板、樣式與單檔建置 |
-| core.test.js / clipboard.test.js / security.test.js | 自動檢查計算、匯出、複製與安全限制 |
+| core.test.js / clipboard.test.js / security.test.js / table-ui.test.js | 自動檢查計算、匯出、複製與安全限制 |
 | Agent操作說明.md | 供 AI agent 使用的操作與核對流程 |
 
 ## 已知限制

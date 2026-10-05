@@ -5,15 +5,16 @@
   const price = v => v == null ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 4 });
   const compact = v => { const a = Math.abs(v); return (v < 0 ? '−' : '+') + (a >= 1e9 ? (a / 1e9).toFixed(2) + 'B' : a >= 1e6 ? (a / 1e6).toFixed(2) + 'M' : a >= 1e3 ? (a / 1e3).toFixed(1) + 'K' : a.toFixed(0)); };
   const uid = () => 'l' + (++nextId); let nextId = 0, toastTimer, chartScale, drag = null;
-  const state = { data: null, weeks: [], from: '', to: '', selected: '', options: { ...C.DEFAULT_OPTIONS }, ceRows: [], cePolicy: 'last', tableMeta: null, inspection: { expiry: 'all', allPrices: false, price: null }, gammaError: '', tableError: '', busy: false };
+  const state = { data: null, weeks: [], from: '', to: '', selected: '', options: { ...C.DEFAULT_OPTIONS }, ceRows: [], cePolicy: 'last', tableMeta: null, levelText: '', inspection: { expiry: 'all', allPrices: false, price: null }, gammaError: '', tableError: '', busy: false };
   function toast(s) { $('toast').textContent = s; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').hidden = true, 3300); }
   function notice(s, error = false) { $('notice').textContent = s; $('notice').hidden = !s; $('notice').classList.toggle('error', error); }
   function activeWeek() { return state.weeks.find(w => w.id === state.selected); }
   function visibleWeeks() { return state.weeks.filter(w => w.start >= state.from && w.start <= state.to); }
-  function snapshot() { return { data: state.data, weeks: state.weeks, from: state.from, to: state.to, selected: state.selected, options: state.options, ceRows: state.ceRows, cePolicy: state.cePolicy, tableMeta: state.tableMeta, inspection: state.inspection }; }
+  function snapshot() { return { data: state.data, weeks: state.weeks, from: state.from, to: state.to, selected: state.selected, options: state.options, ceRows: state.ceRows, cePolicy: state.cePolicy, tableMeta: state.tableMeta, levelText: state.levelText, inspection: state.inspection }; }
   function optionsSync() {
     for (const k of ['topN', 'threshold', 'range', 'gap']) if(k!=='gap'||document.activeElement!==$('gap')) $(k).value = state.options[k];
     if ($('cePolicy')) $('cePolicy').value = state.cePolicy;
+    if (document.activeElement !== $('levelText')) $('levelText').value = state.levelText;
     $('topNOut').textContent = state.options.topN;
     $('thresholdOut').textContent = state.options.threshold + '%';
     $('rangeOut').textContent = state.options.range ? state.options.range + '%' : '全部';
@@ -32,12 +33,12 @@
     if (!groups.length) throw new Error('所有到期日都早於資料日期，沒有可畫的結算週。');
     state.data = data;
     state.weeks = groups.map(w => ({ ...w, drawings: [] }));
-    state.ceRows = []; state.cePolicy = 'last'; state.tableMeta = null;
+    state.ceRows = []; state.cePolicy = 'last'; state.tableMeta = null; state.levelText = '';
     state.options = { ...C.DEFAULT_OPTIONS }; state.inspection = { expiry: 'all', allPrices: false, price: null };
     state.gammaError = ''; state.tableError = ''; $('lineWidth').value = '3';
     state.from = state.weeks[0].start; state.to = C.addDays(state.from, 21); state.selected = state.from;
     if (session) {
-      Object.assign(state, { from: session.from, to: session.to, selected: session.selected, options: { ...session.options }, ceRows: session.ceRows || [], cePolicy: session.cePolicy || 'last', tableMeta: session.tableMeta || null, inspection: { ...state.inspection, ...session.inspection } });
+      Object.assign(state, { from: session.from, to: session.to, selected: session.selected, options: { ...session.options }, ceRows: session.ceRows || [], cePolicy: session.cePolicy || 'last', tableMeta: session.tableMeta || null, levelText: session.levelText || '', inspection: { ...state.inspection, ...session.inspection } });
       for (const w of state.weeks) w.drawings = (session.weeks.find(x => x.id === w.id)?.drawings || []).filter(l=>l.source!=='html-flip').map(l => ({ ...l, id: uid() }));
       render();
     } else regenerate();
@@ -186,6 +187,7 @@
     for(const w of s.weeks)if(!C.dateValid(w.id)||!Array.isArray(w.drawings)||w.drawings.length>500||w.drawings.some(l=>!Number.isFinite(l.price)||l.price<=0||!C.COLORS[l.kind]||typeof l.source!=='string'||typeof l.enabled!=='boolean'))throw new Error('工作檔含無效線條。');
     for(const [k,min,max]of[['topN',1,8],['threshold',0,100],['range',0,50],['gap',0,1e9]])if(!Number.isFinite(s.options?.[k])||s.options[k]<min||s.options[k]>max)throw new Error('工作檔的篩選值無效。');
     if(s.cePolicy && !['last','all'].includes(s.cePolicy))throw new Error('工作檔的 CE 取值方式無效。');
+    if(s.levelText !== undefined && (typeof s.levelText !== 'string' || s.levelText.length > 50000))throw new Error('工作檔的 Level 文字格式無效或超過 50,000 字元。');
     if(s.inspection && (typeof s.inspection.allPrices!=='boolean'||(s.inspection.expiry!=='all'&&!C.dateValid(s.inspection.expiry))||(s.inspection.price!==null&&(!Number.isFinite(s.inspection.price)||s.inspection.price<=0))))throw new Error('工作檔的觀察設定無效。');
     if(s.ceRows && (!Array.isArray(s.ceRows)||s.ceRows.length>500||s.ceRows.some(r=>!C.dateValid(r.date)||(r.flip!==null&&(!Number.isFinite(r.flip)||r.flip<=0))||(r.asOf&&!C.dateValid(r.asOf)))))throw new Error('工作檔的 Table CE 格式無效。');
     return s;
@@ -200,6 +202,7 @@
   }
   $('uploadBtn').onclick=()=>$('files').click();$('files').onchange=e=>importFiles(e.target.files);
   $('emptyUpload').onclick=()=>$('files').click();
+  $('levelText').oninput=()=>{state.levelText=$('levelText').value;};
   $('uploadBtn').ondragover=e=>{e.preventDefault();$('uploadBtn').classList.add('drag-over');};$('uploadBtn').ondragleave=()=>$('uploadBtn').classList.remove('drag-over');$('uploadBtn').ondrop=e=>{e.preventDefault();$('uploadBtn').classList.remove('drag-over');importFiles(e.dataTransfer.files);};
   for(const id of ['fromWeek','toWeek'])$(id).onchange=()=>{state.from=$('fromWeek').value;state.to=$('toWeek').value;if(state.from>state.to){if(id==='fromWeek')state.to=state.from;else state.from=state.to;}fillSelectors();render();document.querySelectorAll('[data-horizon]').forEach(b=>b.classList.remove('active'));};
   document.querySelectorAll('[data-horizon]').forEach(b=>b.onclick=()=>{state.from=state.weeks[0].start;state.to=b.dataset.horizon==='all'?state.weeks.at(-1).start:C.addDays(state.from,(Number(b.dataset.horizon)-1)*7);fillSelectors();render();document.querySelectorAll('[data-horizon]').forEach(x=>x.classList.toggle('active',x===b));});

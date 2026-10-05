@@ -90,7 +90,7 @@ test('CSV controls/producers are removed while Pine and JSON paths remain wired'
   assert.match(shell,/id="tableFile"[^>]*accept="\.html,\.htm"/);
   assert.match(app,/\$\('saveProject'\)\.onclick/);assert.match(app,/validateProject\(JSON.parse\(text\)\)/);
   assert.match(app,/\$\('downloadPine'\)\.onclick/);assert.match(app,/\$\('copyPine'\)\.onclick/);
-  const elements=new Proxy({}, {get:(target,id)=>target[id]??=(id==='tableFile'?{value:'x'}:{value:'',click(){},showModal(){},close(){}})});
+  const elements=new Proxy({}, {get:(target,id)=>target[id]??={value:'',click(){},showModal(){},close(){}}});
   const state={data:{},weeks:[]};
   vm.runInNewContext(tableUI,{GammaCore:C,GammaStudio:{state,activeWeek(){},render(){},toast(){},uid(){}},document:{getElementById:id=>elements[id],addEventListener(){}}});
   elements.importCE.onclick();assert.equal(elements.applyCE.disabled,true);

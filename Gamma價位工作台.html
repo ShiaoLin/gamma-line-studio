@@ -10,9 +10,11 @@
 .level-panel table{min-width:460px}.level-panel th:first-child{white-space:nowrap}.gamma-heading{white-space:nowrap}#levelRows .line-gamma{font-size:12px;text-align:right;white-space:nowrap;font-family:Consolas,monospace;font-variant-numeric:tabular-nums}#levelRows .line-source{color:var(--muted);font-size:10px}#levelRows .gamma-value.pos{color:var(--green)}#levelRows .gamma-value.neg{color:var(--red)}.gamma-help{padding:0 20px;margin:12px 0 0}#addLevelDialog{max-width:410px}#addLevelDialog h2{font-size:20px}#addLevelDialog .field{font-size:13px;margin:18px 0 8px}#addLevelDialog input,#addLevelDialog select{font-size:14px;min-height:44px}#addLevelDialog input[aria-invalid="true"]{border-color:var(--red)}.field-error{color:#ffb8c3;font-size:12px;min-height:19px;margin:6px 0 16px}.dialog-actions{display:flex;justify-content:flex-end;gap:12px}.dialog-actions button{min-height:44px;min-width:86px}
 
 #addLevelDialog input:not([aria-invalid="true"]){border-color:var(--border)}
+
+#levelText{width:100%;min-height:108px;resize:vertical;font:12px/1.7 Consolas,"Microsoft JhengHei",monospace;overflow-wrap:anywhere}
 </style></head>
 <body>
-<header class="app-header"><div class="brand"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#172c26"/><path d="M10 25V10h15M10 16h9" stroke="#86dbb0" stroke-width="2.5" fill="none"/></svg><div><strong>Gamma Line Studio</strong><span>每週價位工作台</span></div><span class="version">v1.1.0</span></div><div class="header-actions"><button id="helpBtn" class="quiet">使用說明</button><button id="saveProject">儲存工作檔</button><button id="exportBtn" class="primary">匯出到 TradingView <span aria-hidden="true">↗</span></button></div></header>
+<header class="app-header"><div class="brand"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#172c26"/><path d="M10 25V10h15M10 16h9" stroke="#86dbb0" stroke-width="2.5" fill="none"/></svg><div><strong>Gamma Line Studio</strong><span>每週價位工作台</span></div><span class="version">v1.2.0</span></div><div class="header-actions"><button id="helpBtn" class="quiet">使用說明</button><button id="saveProject">儲存工作檔</button><button id="exportBtn" class="primary">匯出到 TradingView <span aria-hidden="true">↗</span></button></div></header>
 <main class="workspace">
 <aside class="sidebar" aria-label="資料與篩選設定">
 <div class="section-label">01 <span>資料來源</span></div>
@@ -31,7 +33,7 @@
 <details class="filter-help"><summary>這些設定如何選線？</summary><p>先限制價格範圍，再按正負各自的 |Gamma| 排名；只取達到強度門檻、符合間距的前幾名。</p><p><strong>最低強度：</strong>同週同向最大柱為 100%。例如 100、40、15，門檻 20% 會留下 100 和 40。</p><p><strong>價格範圍：</strong>快照現價 200、±30% 時，候選價位為 140–260。設 0 為全部；改變範圍也可能改變排名與強度分母。</p><p><strong>最小間距：</strong>以價格金額計算，只限制同向價位。例 200、202.5、205，若 200 最強且間距設 5，可保留 200、205。預設 0 保留相近大價位。</p><p>預設：正負各 3、強度 20%、範圍 ±30%、間距 0。只影響自動 Gamma 線；手動線與 Table CE 不受篩選限制。</p></details>
 <button id="resetAuto" class="full">重新選線（保留手動線）</button><button id="resetDefaults" class="full secondary-reset">恢復預設並重建選線</button><p class="hint">恢復預設會清除手動線與隱藏狀態，重建自動線與 Table CE；保留已匯入資料、CE 取值方式及結算範圍。</p>
 <div class="divider"></div><div class="section-label">04 <span>Flip / CE</span></div>
-<button id="importCE" class="full">匯入 Table · CE 與 Levels</button><label class="field">每週 CE 取值<select id="cePolicy"><option value="last">最後到期日（通常週五）</option><option value="all">保留全部到期日</option></select></label><p id="ceInfo" class="hint">尚未匯入 Table。CE 與 Level 價位一律以 Table 為準。</p>
+<button id="importCE" class="dropzone" aria-describedby="ceInfo"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><strong>載入 Table HTML</strong><span>點擊或拖入一份檔案</span></button><p id="ceInfo" class="hint">尚未匯入 Table。CE 與 Level 價位一律以 Table 為準。</p><label class="field">每週 CE 取值<select id="cePolicy"><option value="last">最後到期日（通常週五）</option><option value="all">保留全部到期日</option></select></label><label class="field" for="levelText">Level 文字（暫存）<textarea id="levelText" rows="4" maxlength="50000" spellcheck="false" aria-describedby="levelTextHint" placeholder="貼上或輸入 Level 文字"></textarea></label><p id="levelTextHint" class="hint">僅保存文字，尚未解析或畫線；會隨工作檔儲存。載入新 Gamma 時清空。</p>
 </fieldset><div class="local-note"><span class="status-dot"></span>本機處理，HTML 不會上傳</div>
 </aside>
 <section class="content">
@@ -55,7 +57,7 @@
 <div class="dialog-actions"><button type="button" class="close-dialog" id="cancelAddLevel">取消</button><button type="submit" class="primary" id="confirmAddLevel">確定新增</button></div>
 </form></dialog>
 <dialog id="exportDialog"><div class="modal-heading"><div><div class="eyebrow">TRADINGVIEW EXPORT</div><h2>你的價位，準備上圖。</h2></div><button class="close-dialog" aria-label="關閉匯出視窗">×</button></div><p>在 TradingView 開啟「Pine 編輯器」，建立新指標，貼上後選擇「新增到圖表」。</p><div class="export-settings"><label class="field">股票代號<input id="symbolInput" maxlength="24"></label><label class="field">線寬<select id="lineWidth"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></label><button id="copyPine" class="primary">複製 Pine Script</button><button id="selectPine">全選程式碼</button><button id="downloadPine">下載 .pine</button></div><p id="exportStatus" role="status"></p><textarea id="pineCode" spellcheck="false" readonly aria-label="Pine Script 程式碼"></textarea><div class="modal-bottom"><span id="exportSummary"></span></div><p class="hint">線條以美東週一至週五定位，包含夏令時間。預設畫到週五開盤，讓週與週之間留白；在指標設定關閉「週間留白」可畫到週五收盤。Pine 線條需回到本工具調整，不是 TradingView 原生可拖曳繪圖。新增指標後若看不到未來週，請將圖表向左拖出右側空間。</p></dialog>
-<dialog id="helpDialog"><div class="modal-heading"><h2>從 HTML 到 TradingView</h2><button class="close-dialog" aria-label="關閉使用說明">×</button></div><ol class="help-steps"><li><strong>載入</strong> 一份 Lieta Gamma HTML。新 Gamma 會取代目前資料，清除舊 Table 與手動線，恢復預設篩選。</li><li><strong>選結算範圍</strong>，同週多個到期日會合併。週數以曆週計算，不會把缺少到期資料的週補成有資料。</li><li><strong>觀察分布</strong>：切換整週／單一到期日，或查看全部履約價，不影響已選線。觀察價位可查看各到期日貢獻；實際加入仍採整週淨 Gamma。</li><li><strong>微調價位</strong>：點 Gamma 長條挑選、拖曳預覽線或直接輸入價格。改動自動篩選會更新自動線，手動線保留。</li><li><strong>設定黃線</strong>：在 Lieta 選 Table → 輸入相同股票 → Enter → 下載，再按「匯入 Table」。每週取最後到期日的 Gamma_Flip。</li><li><strong>匯出</strong> Pine Script，貼入 TradingView 新指標並新增到圖表。資料更新時重新匯出。</li></ol><p>「儲存工作檔」會保留資料、篩選與手動線。下次用「載入 Gamma HTML」選取該 JSON，即可恢復原有設定與觀察位置。重新整理頁面會回到空白狀態。</p><p class="hint">附件中的網頁內容只當資料解析，不會被執行或當作操作指令。</p></dialog>
+<dialog id="helpDialog"><div class="modal-heading"><h2>從 HTML 到 TradingView</h2><button class="close-dialog" aria-label="關閉使用說明">×</button></div><ol class="help-steps"><li><strong>載入</strong> 一份 Lieta Gamma HTML。新 Gamma 會取代目前資料，清除舊 Table 與手動線，恢復預設篩選。</li><li><strong>選結算範圍</strong>，同週多個到期日會合併。週數以曆週計算，不會把缺少到期資料的週補成有資料。</li><li><strong>觀察分布</strong>：切換整週／單一到期日，或查看全部履約價，不影響已選線。觀察價位可查看各到期日貢獻；實際加入仍採整週淨 Gamma。</li><li><strong>微調價位</strong>：點 Gamma 長條挑選、拖曳預覽線或直接輸入價格。改動自動篩選會更新自動線，手動線保留。</li><li><strong>設定黃線</strong>：在 Lieta 選 Table → 輸入相同股票 → Enter → 下載，再點選或拖入「載入 Table HTML」，核對後套用。每週取最後到期日的 Gamma_Flip。</li><li><strong>匯出</strong> Pine Script，貼入 TradingView 新指標並新增到圖表。資料更新時重新匯出。</li></ol><p>「儲存工作檔」會保留資料、篩選與手動線。下次用「載入 Gamma HTML」選取該 JSON，即可恢復原有設定與觀察位置。重新整理頁面會回到空白狀態。</p><p class="hint">附件中的網頁內容只當資料解析，不會被執行或當作操作指令。</p></dialog>
 <dialog id="ceDialog"><div class="modal-heading"><div><div class="eyebrow">LIETA TABLE → CE & LEVELS</div><h2>匯入每週 CE 與 Levels</h2></div><button class="close-dialog" aria-label="關閉 CE 匯入視窗">×</button></div><p class="hint">在 <a href="https://www.lietaresearch.com/platform" target="_blank" rel="noreferrer">Lieta 平台</a> 選 Table、輸入相同股票、按 Enter 後下載。本工具以 Gamma_Flip 畫黃線，並保留 Table 的其他 Level 原始價位。</p><div class="ce-actions"><button id="pickTable" class="primary">選取 Table HTML</button><input id="tableFile" type="file" accept=".html,.htm" hidden></div><div class="field-pair"><label class="field">Table 股票代號<input id="ceSymbol" placeholder="例如 NVDA"></label><label class="field">Table 資料日期<input id="ceDate" type="date"></label></div><p id="cePreview" class="notice" role="status">尚未載入 Table。</p><label id="mismatchChoice" class="checkbox" hidden><input id="allowMismatch" type="checkbox"><span>我知道資料日期不同，仍將這份 Table 的 CE 與 Levels 套用到目前 Gamma 快照</span></label><div class="ce-actions"><button id="applyCE" class="primary" disabled>套用每週 CE 與 Levels</button></div></dialog>
 <div id="toast" role="status" class="toast" hidden></div>
 <script>(function (root) {
@@ -375,15 +377,16 @@ ${calls.join('\n')}
   const price = v => v == null ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 4 });
   const compact = v => { const a = Math.abs(v); return (v < 0 ? '−' : '+') + (a >= 1e9 ? (a / 1e9).toFixed(2) + 'B' : a >= 1e6 ? (a / 1e6).toFixed(2) + 'M' : a >= 1e3 ? (a / 1e3).toFixed(1) + 'K' : a.toFixed(0)); };
   const uid = () => 'l' + (++nextId); let nextId = 0, toastTimer, chartScale, drag = null;
-  const state = { data: null, weeks: [], from: '', to: '', selected: '', options: { ...C.DEFAULT_OPTIONS }, ceRows: [], cePolicy: 'last', tableMeta: null, inspection: { expiry: 'all', allPrices: false, price: null }, gammaError: '', tableError: '', busy: false };
+  const state = { data: null, weeks: [], from: '', to: '', selected: '', options: { ...C.DEFAULT_OPTIONS }, ceRows: [], cePolicy: 'last', tableMeta: null, levelText: '', inspection: { expiry: 'all', allPrices: false, price: null }, gammaError: '', tableError: '', busy: false };
   function toast(s) { $('toast').textContent = s; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').hidden = true, 3300); }
   function notice(s, error = false) { $('notice').textContent = s; $('notice').hidden = !s; $('notice').classList.toggle('error', error); }
   function activeWeek() { return state.weeks.find(w => w.id === state.selected); }
   function visibleWeeks() { return state.weeks.filter(w => w.start >= state.from && w.start <= state.to); }
-  function snapshot() { return { data: state.data, weeks: state.weeks, from: state.from, to: state.to, selected: state.selected, options: state.options, ceRows: state.ceRows, cePolicy: state.cePolicy, tableMeta: state.tableMeta, inspection: state.inspection }; }
+  function snapshot() { return { data: state.data, weeks: state.weeks, from: state.from, to: state.to, selected: state.selected, options: state.options, ceRows: state.ceRows, cePolicy: state.cePolicy, tableMeta: state.tableMeta, levelText: state.levelText, inspection: state.inspection }; }
   function optionsSync() {
     for (const k of ['topN', 'threshold', 'range', 'gap']) if(k!=='gap'||document.activeElement!==$('gap')) $(k).value = state.options[k];
     if ($('cePolicy')) $('cePolicy').value = state.cePolicy;
+    if (document.activeElement !== $('levelText')) $('levelText').value = state.levelText;
     $('topNOut').textContent = state.options.topN;
     $('thresholdOut').textContent = state.options.threshold + '%';
     $('rangeOut').textContent = state.options.range ? state.options.range + '%' : '全部';
@@ -402,12 +405,12 @@ ${calls.join('\n')}
     if (!groups.length) throw new Error('所有到期日都早於資料日期，沒有可畫的結算週。');
     state.data = data;
     state.weeks = groups.map(w => ({ ...w, drawings: [] }));
-    state.ceRows = []; state.cePolicy = 'last'; state.tableMeta = null;
+    state.ceRows = []; state.cePolicy = 'last'; state.tableMeta = null; state.levelText = '';
     state.options = { ...C.DEFAULT_OPTIONS }; state.inspection = { expiry: 'all', allPrices: false, price: null };
     state.gammaError = ''; state.tableError = ''; $('lineWidth').value = '3';
     state.from = state.weeks[0].start; state.to = C.addDays(state.from, 21); state.selected = state.from;
     if (session) {
-      Object.assign(state, { from: session.from, to: session.to, selected: session.selected, options: { ...session.options }, ceRows: session.ceRows || [], cePolicy: session.cePolicy || 'last', tableMeta: session.tableMeta || null, inspection: { ...state.inspection, ...session.inspection } });
+      Object.assign(state, { from: session.from, to: session.to, selected: session.selected, options: { ...session.options }, ceRows: session.ceRows || [], cePolicy: session.cePolicy || 'last', tableMeta: session.tableMeta || null, levelText: session.levelText || '', inspection: { ...state.inspection, ...session.inspection } });
       for (const w of state.weeks) w.drawings = (session.weeks.find(x => x.id === w.id)?.drawings || []).filter(l=>l.source!=='html-flip').map(l => ({ ...l, id: uid() }));
       render();
     } else regenerate();
@@ -556,6 +559,7 @@ ${calls.join('\n')}
     for(const w of s.weeks)if(!C.dateValid(w.id)||!Array.isArray(w.drawings)||w.drawings.length>500||w.drawings.some(l=>!Number.isFinite(l.price)||l.price<=0||!C.COLORS[l.kind]||typeof l.source!=='string'||typeof l.enabled!=='boolean'))throw new Error('工作檔含無效線條。');
     for(const [k,min,max]of[['topN',1,8],['threshold',0,100],['range',0,50],['gap',0,1e9]])if(!Number.isFinite(s.options?.[k])||s.options[k]<min||s.options[k]>max)throw new Error('工作檔的篩選值無效。');
     if(s.cePolicy && !['last','all'].includes(s.cePolicy))throw new Error('工作檔的 CE 取值方式無效。');
+    if(s.levelText !== undefined && (typeof s.levelText !== 'string' || s.levelText.length > 50000))throw new Error('工作檔的 Level 文字格式無效或超過 50,000 字元。');
     if(s.inspection && (typeof s.inspection.allPrices!=='boolean'||(s.inspection.expiry!=='all'&&!C.dateValid(s.inspection.expiry))||(s.inspection.price!==null&&(!Number.isFinite(s.inspection.price)||s.inspection.price<=0))))throw new Error('工作檔的觀察設定無效。');
     if(s.ceRows && (!Array.isArray(s.ceRows)||s.ceRows.length>500||s.ceRows.some(r=>!C.dateValid(r.date)||(r.flip!==null&&(!Number.isFinite(r.flip)||r.flip<=0))||(r.asOf&&!C.dateValid(r.asOf)))))throw new Error('工作檔的 Table CE 格式無效。');
     return s;
@@ -570,6 +574,7 @@ ${calls.join('\n')}
   }
   $('uploadBtn').onclick=()=>$('files').click();$('files').onchange=e=>importFiles(e.target.files);
   $('emptyUpload').onclick=()=>$('files').click();
+  $('levelText').oninput=()=>{state.levelText=$('levelText').value;};
   $('uploadBtn').ondragover=e=>{e.preventDefault();$('uploadBtn').classList.add('drag-over');};$('uploadBtn').ondragleave=()=>$('uploadBtn').classList.remove('drag-over');$('uploadBtn').ondrop=e=>{e.preventDefault();$('uploadBtn').classList.remove('drag-over');importFiles(e.dataTransfer.files);};
   for(const id of ['fromWeek','toWeek'])$(id).onchange=()=>{state.from=$('fromWeek').value;state.to=$('toWeek').value;if(state.from>state.to){if(id==='fromWeek')state.to=state.from;else state.from=state.to;}fillSelectors();render();document.querySelectorAll('[data-horizon]').forEach(b=>b.classList.remove('active'));};
   document.querySelectorAll('[data-horizon]').forEach(b=>b.onclick=()=>{state.from=state.weeks[0].start;state.to=b.dataset.horizon==='all'?state.weeks.at(-1).start:C.addDays(state.from,(Number(b.dataset.horizon)-1)*7);fillSelectors();render();document.querySelectorAll('[data-horizon]').forEach(x=>x.classList.toggle('active',x===b));});
@@ -649,10 +654,10 @@ ${calls.join('\n')}
 </script>
 <script>(function(){
   'use strict';
-  const C=GammaCore,S=GammaStudio,$=id=>document.getElementById(id);let pending=null;
+  const C=GammaCore,S=GammaStudio,$=id=>document.getElementById(id);let pending=null,reading=false,readId=0;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function preview(){
-    if(!pending||!S.state.data)return;
+    if(!pending||!S.state.data||S.state.busy){$('applyCE').disabled=true;return;}
     const symbol=$('ceSymbol').value.trim().toUpperCase(),date=$('ceDate').value,sameSymbol=symbol===S.state.data.symbol&&(!pending.symbol||pending.symbol===symbol),sameDate=date===S.state.data.asOf;
     const matches=C.weeklyCE(S.state.weeks,pending.rows,S.state.cePolicy),covered=matches.filter(w=>w.rows.length).length;
     const overlaps=pending.rows.some(r=>S.state.weeks.some(w=>r.date>=w.start&&r.date<=w.end));
@@ -688,17 +693,30 @@ ${calls.join('\n')}
     $('tableReferenceCaption').textContent=`${week.end.slice(5)} 結算週 · 黃線預設取 ${last} 的 Gamma_Flip · 其他欄位保留 Table 原值`;
     $('tableReference').innerHTML=rows.length?'<table><thead><tr><th>Expiration</th>'+fields.map(f=>'<th>'+f+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r.date)+(r.date===last?' ●':'')+'</td>'+fields.map(f=>'<td class="'+(f==='Gamma_Flip'?'flip':'')+'">'+esc((f==='Gamma_Flip'?r.flip:r.levels?.[f])??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'<p class="empty-text">本週尚無 Table 資料，Level 價位保持空白。</p>';
   }
-  function clearPending(){pending=null;$('ceSymbol').value='';$('ceDate').value='';$('ceSymbol').readOnly=false;$('ceDate').readOnly=false;$('allowMismatch').checked=false;$('mismatchChoice').hidden=true;$('cePreview').textContent='尚未載入 Table。';$('applyCE').disabled=true;}
-  $('importCE').onclick=()=>{if(!S.state.data)return;clearPending();$('ceDialog').showModal();};
-  $('pickTable').onclick=()=>{$('tableFile').accept='.html,.htm';$('tableFile').click();};
-  $('tableFile').onchange=async e=>{
-    const f=e.target.files[0];if(!f)return;
-    pending=null;$('applyCE').disabled=true;$('cePreview').textContent='正在讀取 Table…';
-    $('pickTable').disabled=true;
-    try{if(!/\.html?$/i.test(f.name))throw new Error('Table 僅接受 HTML 檔案。');if(f.size>35*1024*1024)throw new Error('Table 檔案上限為 35 MB。');parse(await f.text(),f.name);}
-    catch(error){fail(error.message);}
-    finally{$('pickTable').disabled=false;$('tableFile').value='';}
-  };
+  function clearPending(){readId++;reading=false;pending=null;$('importCE').disabled=false;$('pickTable').disabled=false;$('tableFile').value='';$('ceSymbol').value='';$('ceDate').value='';$('ceSymbol').readOnly=false;$('ceDate').readOnly=false;$('allowMismatch').checked=false;$('mismatchChoice').hidden=true;$('cePreview').textContent='尚未載入 Table。';$('applyCE').disabled=true;}
+  function pickTable(){if(!S.state.data||S.state.busy||reading)return;clearPending();$('tableFile').click();}
+  async function importTable(files){
+    const selected=Array.from(files);
+    if(!selected.length||reading||S.state.busy)return;
+    if(!S.state.data){S.toast('請先載入 Gamma HTML，再匯入相同 ticker 的 Table。');return;}
+    clearPending();$('ceDialog').showModal();
+    if(selected.length!==1){fail('一次請載入一份 Table HTML。');return;}
+    const f=selected[0],request=++readId,gamma=S.state.data;reading=true;
+    $('cePreview').textContent='正在讀取 Table…';$('importCE').disabled=true;$('pickTable').disabled=true;
+    try{
+      if(!/\.html?$/i.test(f.name))throw new Error('Table 僅接受 HTML 檔案。');
+      if(f.size>35*1024*1024)throw new Error('Table 檔案上限為 35 MB。');
+      const text=await f.text();
+      if(request!==readId||gamma!==S.state.data||S.state.busy)return;
+      parse(text,f.name);
+    }catch(error){if(request===readId&&gamma===S.state.data&&!S.state.busy)fail(error.message);}
+    finally{if(request===readId){reading=false;$('importCE').disabled=false;$('pickTable').disabled=false;$('tableFile').value='';}}
+  }
+  $('importCE').onclick=pickTable;$('pickTable').onclick=pickTable;
+  $('tableFile').onchange=e=>importTable(e.target.files);
+  $('importCE').ondragover=e=>{e.preventDefault();if(S.state.data&&!S.state.busy&&!reading)$('importCE').classList.add('drag-over');};
+  $('importCE').ondragleave=()=>$('importCE').classList.remove('drag-over');
+  $('importCE').ondrop=e=>{e.preventDefault();$('importCE').classList.remove('drag-over');return importTable(e.dataTransfer.files);};
   for(const id of ['ceSymbol','ceDate','allowMismatch'])$(id).oninput=preview;
   $('applyCE').onclick=()=>{preview();if($('applyCE').disabled)return;S.state.ceRows=pending.rows.map(r=>({...r,asOf:$('ceDate').value}));S.state.tableMeta={filename:pending.filename||'Table HTML',symbol:$('ceSymbol').value.trim().toUpperCase(),asOf:$('ceDate').value};S.state.tableError='';applyRows();$('ceDialog').close();S.toast('已套用 Table CE 與 Levels，保留手動黃線');};
   $('cePolicy').onchange=()=>{S.state.cePolicy=$('cePolicy').value;applyRows();};
