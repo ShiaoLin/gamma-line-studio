@@ -14,8 +14,8 @@
 
 ## 下載與開始使用
 
-1. 前往 [最新 Release](https://github.com/ShiaoLin/gamma-line-studio/releases/latest)，下載 `Gamma-Line-Studio-v1.2.1.zip` 並解壓縮。也可只下載 Release 中的單一 HTML。
-2. 用 Chrome、Edge 或 Firefox 開啟 `Gamma-Line-Studio-v1.2.1.html`。原始碼目錄內的建置結果名為 **Gamma價位工作台.html**。
+1. 前往 [最新 Release](https://github.com/ShiaoLin/gamma-line-studio/releases/latest)，下載 `Gamma-Line-Studio-v1.3.0.zip` 並解壓縮。也可只下載 Release 中的單一 HTML。
+2. 用 Chrome、Edge 或 Firefox 開啟 `Gamma-Line-Studio-v1.3.0.html`。原始碼目錄內的建置結果名為 **Gamma價位工作台.html**。
 3. 準備自己的 Gamma HTML；如需黃線與 Levels，再準備相同 ticker 的 Table HTML。
 
 分析已下載資料可離線進行。取得新行情與在 TradingView 使用指標仍需網路。本專案沒有背景抓取或自動更新資料。
@@ -30,16 +30,25 @@
 4. 進入 [Lieta 平台](https://www.lietaresearch.com/platform)，模型選 Table，輸入相同 ticker 後按 Enter。下載 Table HTML，點擊工作台的「載入 Table HTML」選檔，或直接拖入該區塊。代號與日期匹配且有對應結算週時，直接更新 CE 與 Levels，不跳彈窗。需要補填資料、跨日核對或遇到錯誤時，在載入區下方處理；日期不同仍須明確確認，代號不同禁止套用。Table 僅接受 HTML；不提供 CSV / TSV、貼上表格解析與書籤擷取。只有資料日期不同時才顯示跨日配對選項。
 5. **Gamma Flip、Gamma Field、Call/Put Wall 等 Level 值以 Table 為準**。每週黃色線預設採該週最後到期日的 Gamma_Flip；若星期五沒有交易而最後到期在星期四，取星期四。缺少最後到期日 CE 時留白，不拿其他日期或 HTML 整體 Flip 補值。其他 Table Levels 顯示於核對表，不擅自指派正負 Gamma 色。
 6. 可切換整週／單一到期日分布、勾選「查看全部履約價」，並用「觀察價位」查看各到期日的 Gamma 貢獻。這些觀察設定不改動選線。點分布長條或按「加入／隱藏本週價位」才會變更繪圖，加入的方向仍依整週淨 Gamma；整週抵銷為 0 不加入線條。
-7. 按「＋ 加線」後，在小視窗選擇正 Gamma／負 Gamma／Flip CE，輸入價格並按「確定新增」。取消、關閉或 Esc 都不新增；空白與非正數不接受。也可拖曳線條或輸入精確價格。拖曳以 0.5 為間距；數字欄可輸入任意正數。手動變更標示為「手動」。「重新選線」保留手動線；「恢復預設並重建選線」將四項篩選恢復預設，清除手動線與隱藏狀態，並重新套用 Table CE。資料、結算範圍與 CE 取值方式保留。
+7. 按「＋ 加線」後，在小視窗選擇正 Gamma／負 Gamma／Flip CE，輸入價格並按「確定新增」。取消、關閉或 Esc 都不新增；空白與非正數不接受。價位編輯的數字欄可輸入任意正數；所有裝置均取消預覽拖線，滑動查看不會改價。手動變更標示為「手動」。「重新選線」保留手動線；「恢復預設並重建選線」將四項篩選恢復預設，清除手動線與隱藏狀態，並重新套用 Table CE。資料、結算範圍與 CE 取值方式保留。
 8. 按「匯出到 TradingView」，複製 Pine Script，在 Pine 編輯器新建指標、貼上並新增到圖表。價位標籤預設為 Large，可在指標設定調整。複製按鈕會顯示進度與完成結果；瀏覽器超過 1.5 秒未完成時，全選程式碼並提示按 Ctrl+C（Mac：⌘C）。也可直接按「全選程式碼」，或下載 .pine。
 9. 每週 CE 取值下的「Level 文字（暫存）」可貼上長文字（最多 50,000 字元），目前只保存文字，不解析、不畫線，也不加入 Pine。載入新 Gamma 會清空，調整篩選或重新選線則保留。
 10. 「儲存工作檔」下載 JSON；下次用載入按鈕開啟，可恢復手動線、Table、Level 文字、篩選、週別與觀察設定。也支援舊版工作檔。歷史線保留／鎖定更新尚未實作，新 Gamma 仍會取代目前資料。
+
+## 手機與平板
+
+- iPhone 可直向完成匯入、選線、編輯與 Pine 匯出。窄螢幕匯入 Gamma／工作檔或成功套用 Table 後，自動收合「資料與設定」，保留股票、資料日期及結算範圍摘要；點一下即可展開。需要核對的匯入錯誤會展開設定。
+- 畫線預覽保留文字大小，多週內容可左右滑動。按「放大預覽」使用大部分螢幕；橫向可看到更多週。按「返回工作台」或 Esc 關閉，資料與編輯內容保留。所有裝置均取消預覽拖線。
+- 手機價位編輯改為逐筆排列，顯示、類型、價位、整週淨 Gamma、來源與刪除均可直接操作；點 Gamma 數值可展開完整數字。「編輯價位／觀察分布」可快速跳到對應區域。
+- iPad 橫向保留側邊設定，分布與編輯區上下排列。觸控按鈕與輸入欄位加大，直橫向切換不清除資料。
+- 複製遇到限制時，可全選程式碼後長按選「拷貝」，或下載 `.pine`。行動裝置建議使用線上版；離線 HTML 的開啟與下載方式依瀏覽器及系統而異。
+- 版面與流程以瀏覽器不同尺寸驗證，尚未以實體 iPhone／iPad 的 Safari 驗證檔案選取、鍵盤及下載。
 
 ## 資料規則
 
 - 同週一至週五的各到期日，在相同履約價上加總 **帶正負號的 Gamma**。正 Gamma 綠線、負 Gamma 紅線。方向與價位高低無關。
 - 自動排序用 |Gamma|；正負分開取前 N。相對強度以該週篩選範圍內同向最大值為分母。沒有選擇權成交量資料，所以這不是 Volume 排名。
-- 價位編輯的「整週淨 Gamma」欄，顯示目前價格在該週原始分布的帶正負號加總，使用 K／M／B 縮寫，游標停留可見完整數字。這個數值可直接跨正負比較，不按各方向重新正規化，也不受觀察到期日或手動線條顏色影響。修改價格後重新查值；沒有對應原始價位顯示「—」，實際相抵為零顯示 0。Flip / CE 同樣依價格查詢 Gamma，CE 本身仍是 Table 價位。預覽提示採相同查值規則。
+- 價位編輯的「整週淨 Gamma」欄，顯示目前價格在該週原始分布的帶正負號加總，使用 K／M／B 縮寫，點選展開數值可見完整數字。這個數值可直接跨正負比較，不按各方向重新正規化，也不受觀察到期日或手動線條顏色影響。修改價格後重新查值；沒有對應原始價位顯示「—」，實際相抵為零顯示 0。Flip / CE 同樣依價格查詢 Gamma，CE 本身仍是 Table 價位。預覽提示採相同查值規則。
 - 每週畫一段美東週一 09:30 至週五 09:30 的水平線，標籤在中間。預設保留週間隔；可在 Pine 指標設定關閉「週間留白」延長到週五 16:00。Pine 以 `America/New_York` 和時間座標處理夏令時間。只定義曆週，不宣稱提供交易所假日資料庫。
 - 畫線預覽中，同週啟用的 Flip / CE 黃線與負 Gamma 紅線在相同價位時，隱藏紅色數值並保留黄色數值。移開或停用黃線，紅字恢復。僅調整預覽標籤，不刪除紅線、不取消價位編輯的勾選，也不改動 Pine 匯出。
 - Gamma 日期取 HTML 的資料時間，優先於檔名和電腦今天日期。已到期資料不補回，缺少的整週不捏造。
@@ -58,9 +67,9 @@
 
 ## 開發與驗證
 
-無第三方執行期依賴。`node build.js` 由 core.js、clipboard.js、app.js、table.js、shell.html 與 styles.css 重建單一 HTML。`node --test core.test.js clipboard.test.js security.test.js table-ui.test.js` 驗證資料解析、週分組、符號、CE 選取、錯誤處理、Pine 輸出及複製成功／拒絕／逾時。`node server.js` 可在本機 `http://127.0.0.1:8765` 開啟，僅監聽本機。
+無第三方執行期依賴。`node build.js` 由 core.js、clipboard.js、app.js、table.js、responsive.js、shell.html 與 styles.css 重建單一 HTML。`node --test core.test.js clipboard.test.js security.test.js table-ui.test.js responsive.test.js` 驗證資料解析、週分組、符號、CE 選取、錯誤處理、Pine 輸出及複製成功／拒絕／逾時。`node server.js` 可在本機 `http://127.0.0.1:8765` 開啟，僅監聽本機。
 
-介面參考 [GEX 熱力圖生產器](https://claude.ai/artifact/1DzmawhDymBEvzHMCKLhFh)。主要差異：用每週獨立水平線取代熱力區塊；顏色依 Gamma 正負；同週短到期合併；Table CE 與 Level 保留來源；支援手動拖曳與工作檔保存。
+介面參考 [GEX 熱力圖生產器](https://claude.ai/artifact/1DzmawhDymBEvzHMCKLhFh)。主要差異：用每週獨立水平線取代熱力區塊；顏色依 Gamma 正負；同週短到期合併；Table CE 與 Level 保留來源；支援手動價位編輯與工作檔保存。
 
 
 ## 維護與版本發布
@@ -74,7 +83,7 @@
 開發需 Node.js 22 以上，無須執行套件安裝：
 
 ```sh
-node --test core.test.js clipboard.test.js security.test.js table-ui.test.js
+node --test core.test.js clipboard.test.js security.test.js table-ui.test.js responsive.test.js
 node build.js
 node server.js
 ```
@@ -97,9 +106,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1
 |---|---|
 | Gamma價位工作台.html | 可直接開啟的完整程式 |
 | core.js | Gamma / Table 解析、週分組、選線與 Pine 匯出 |
-| app.js / table.js / clipboard.js | 操作介面、Table 配對與複製 |
+| app.js / table.js / clipboard.js / responsive.js | 操作介面、Table 配對與複製 |
 | shell.html / styles.css / build.js | 頁面模板、樣式與單檔建置 |
-| core.test.js / clipboard.test.js / security.test.js / table-ui.test.js | 自動檢查計算、匯出、複製與安全限制 |
+| core.test.js / clipboard.test.js / security.test.js / table-ui.test.js / responsive.test.js | 自動檢查計算、匯出、複製與安全限制 |
 | Agent操作說明.md | 供 AI agent 使用的操作與核對流程 |
 
 ## 已知限制

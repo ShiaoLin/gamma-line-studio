@@ -1,10 +1,10 @@
-Gamma Line Studio v1.2.1 — 本機使用說明
+Gamma Line Studio v1.3.0 — 本機使用說明
 
 不用下載也可直接使用：https://shiaolin.github.io/gamma-line-studio/
 線上版與本機版都在自己的瀏覽器解析檔案，不上傳 Gamma / Table。
 
 1. 將 ZIP 解壓縮到自己的資料夾。
-2. 用 Chrome、Edge 或 Firefox 開啟 Gamma-Line-Studio-v1.2.1.html。
+2. 用 Chrome、Edge 或 Firefox 開啟 Gamma-Line-Studio-v1.3.0.html。
    不需要 Codex、Node.js、帳號登入或安裝套件。
 3. 點「載入 Gamma HTML」，選取你自己的 Lieta Gamma HTML。
 4. 選擇結算範圍，匯入同 ticker 的 Table HTML，確認資料日期。僅接受 HTML；不提供 CSV 匯入／匯出。

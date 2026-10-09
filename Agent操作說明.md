@@ -46,3 +46,7 @@
 | 匯出／複製／程式碼 | exportBtn / copyPine / pineCode |
 
 workflowStatus 的 data-state 可為 empty、loading、gamma-ready、partial、ready、error；狀態僅描述匯入與 CE 覆蓋，不代表資料一定新鮮，仍須讀取日期提示。
+
+## 手機與平板版面
+
+窄螢幕匯入成功後會收合「資料與設定」。如要載入 Table 或更改篩選，先點該區摘要展開；核對錯誤會展開顯示。所有裝置均不可拖曳預覽線改價，請使用價位編輯。放大預覽共用同一個圖表，按「返回工作台」再繼續編輯。

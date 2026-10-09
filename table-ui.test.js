@@ -12,7 +12,7 @@ function setup(){
   const events={},elements={};let counter=0;
   function element(id){return elements[id]??={value:'',disabled:false,open:false,clicks:0,classList:{add(){},remove(){}},click(){this.clicks++;},showModal(){this.open=true;},close(){this.open=false;}};}
   const state={data:{symbol:'TEST',asOf:'2026-10-05'},weeks:[{id:'2026-10-05',start:'2026-10-05',end:'2026-10-09',expiries:['2026-10-07','2026-10-09'],drawings:[]}],ceRows:[],cePolicy:'last',tableError:'',busy:false};
-  vm.runInNewContext(tableScript,{GammaCore:C,GammaStudio:{state,activeWeek(){},render(){},toast(){},uid:()=>String(++counter)},document:{getElementById:element,addEventListener:(name,fn)=>{events[name]=fn;}}});
+  vm.runInNewContext(tableScript,{GammaCore:C,GammaStudio:{state,activeWeek(){},render(){},toast(){},uid:()=>String(++counter)},Event:class{},document:{getElementById:element,dispatchEvent(){},addEventListener:(name,fn)=>{events[name]=fn;}}});
   return {state,element,events,drop:files=>element('importCE').ondrop({preventDefault(){},dataTransfer:{files}}),choose:files=>element('tableFile').onchange({target:{files}})};
 }
 test('Table click opens the picker directly; cancelling leaves existing lines alone',()=>{

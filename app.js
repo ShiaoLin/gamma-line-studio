@@ -4,7 +4,7 @@
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const price = v => v == null ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 4 });
   const compact = v => { const a = Math.abs(v); return (v < 0 ? '−' : '+') + (a >= 1e9 ? (a / 1e9).toFixed(2) + 'B' : a >= 1e6 ? (a / 1e6).toFixed(2) + 'M' : a >= 1e3 ? (a / 1e3).toFixed(1) + 'K' : a.toFixed(0)); };
-  const uid = () => 'l' + (++nextId); let nextId = 0, toastTimer, chartScale, drag = null;
+  const uid = () => 'l' + (++nextId); let nextId = 0, toastTimer;
   const state = { data: null, weeks: [], from: '', to: '', selected: '', options: { ...C.DEFAULT_OPTIONS }, ceRows: [], cePolicy: 'last', tableMeta: null, levelText: '', inspection: { expiry: 'all', allPrices: false, price: null }, gammaError: '', tableError: '', busy: false };
   function toast(s) { $('toast').textContent = s; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').hidden = true, 3300); }
   function notice(s, error = false) { $('notice').textContent = s; $('notice').hidden = !s; $('notice').classList.toggle('error', error); }
@@ -108,14 +108,17 @@
     if (data.spot) all.push(data.spot);
     if (!all.length) all.push(0, 100);
     let low = Math.min(...all), high = Math.max(...all), pad = Math.max((high-low)*.14, high*.015, 1); low -= pad; high += pad;
-    const W = Math.max(1000, weeks.length * 165 + 80), H = 520, left = 35, right = W - 78, top = 52, bottom = H-42, col = (right-left)/Math.max(weeks.length,1);
-    const y = p => bottom-(p-low)/(high-low)*(bottom-top); chartScale = { low, high, top, bottom, W, H };
-    $('preview').setAttribute('viewBox', `0 0 ${W} ${H}`); $('preview').style.minWidth = Math.max(570, weeks.length*116) + 'px';
+    const W = Math.max(360, weeks.length * 180 + 100);
+    const host = $('previewDialogChart'), enlarged = $('previewDialog').open;
+    const H = enlarged ? Math.max(220, Math.min(520, (host.clientHeight - 20) * W / Math.max(W, host.clientWidth))) : 520;
+    const left = 35, right = W - 78, top = 52, bottom = H-42, col = (right-left)/Math.max(weeks.length,1);
+    const y = p => bottom-(p-low)/(high-low)*(bottom-top);
+    $('preview').setAttribute('viewBox', `0 0 ${W} ${H}`); $('preview').style.minWidth = W + 'px';
     let out = `<rect width="${W}" height="${H}" fill="#121922"/>`;
     for(let i=0;i<=6;i++){const p=low+(high-low)*i/6, yy=y(p);out+=`<line class="grid" x1="${left}" x2="${right}" y1="${yy}" y2="${yy}"/><text class="axis" x="${right+12}" y="${yy+4}">${price(p)}</text>`;}
     weeks.forEach((w,i)=>{const x=left+i*col;out+=`<rect x="${x}" y="${top}" width="${col}" height="${bottom-top}" fill="${w.id===state.selected?'#88dca909':'transparent'}"/><line class="grid" x1="${x}" x2="${x}" y1="${top}" y2="${bottom}"/><text data-week="${w.id}" class="svg-week" x="${x+col/2}" y="25" fill="${w.id===state.selected?'#bcead0':'#b4c0d1'}" font-size="12" text-anchor="middle">${w.end.slice(5)}${w.monthly?' · 月结':''}</text><text class="axis" x="${x+col/2}" y="${H-13}" text-anchor="middle">${w.start.slice(5)} — ${w.end.slice(5)}</text>`;
       const labelYs=[];
-      w.drawings.filter(l=>l.enabled).sort((a,b)=>b.price-a.price).forEach(l=>{const yy=y(l.price), color=C.COLORS[l.kind], hideLabel=l.kind==='negative'&&w.drawings.some(other=>other.enabled&&other.kind==='flip'&&Math.abs(other.price-l.price)<1e-7);let ty=yy+18;if(!hideLabel){for(const old of labelYs)if(Math.abs(ty-old)<16)ty=old+16;labelYs.push(ty);}out+=`<g class="drag-line" data-line="${l.id}" data-week="${w.id}"><title>${esc(l.kind)} ${price(l.price)} · ${esc(l.source)}${C.gammaAtPrice(w,l.price)!==null?' · 整週淨 Gamma '+compact(C.gammaAtPrice(w,l.price)):''}</title><line x1="${x+15}" x2="${x+col-15}" y1="${yy}" y2="${yy}" stroke="transparent" stroke-width="18"/><line class="visible-line" x1="${x+15}" x2="${x+col-15}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3" stroke-linecap="round"/><text visibility="${hideLabel?'hidden':'visible'}" x="${x+col/2}" y="${ty}" fill="${color}" text-anchor="middle" font-size="15" paint-order="stroke" stroke="#121922" stroke-width="4">${price(l.price)}</text></g>`;});
+      w.drawings.filter(l=>l.enabled).sort((a,b)=>b.price-a.price).forEach(l=>{const yy=y(l.price), color=C.COLORS[l.kind], hideLabel=l.kind==='negative'&&w.drawings.some(other=>other.enabled&&other.kind==='flip'&&Math.abs(other.price-l.price)<1e-7);let ty=yy+18;if(!hideLabel){for(const old of labelYs)if(Math.abs(ty-old)<16)ty=old+16;labelYs.push(ty);}out+=`<g class="preview-line" data-line="${l.id}" data-week="${w.id}"><title>${esc(l.kind)} ${price(l.price)} · ${esc(l.source)}${C.gammaAtPrice(w,l.price)!==null?' · 整週淨 Gamma '+compact(C.gammaAtPrice(w,l.price)):''}</title><line x1="${x+15}" x2="${x+col-15}" y1="${yy}" y2="${yy}" stroke="transparent" stroke-width="18"/><line class="visible-line" x1="${x+15}" x2="${x+col-15}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3" stroke-linecap="round"/><text visibility="${hideLabel?'hidden':'visible'}" x="${x+col/2}" y="${ty}" fill="${color}" text-anchor="middle" font-size="15" paint-order="stroke" stroke="#121922" stroke-width="4">${price(l.price)}</text></g>`;});
     });
     if(data.spot){const yy=y(data.spot);out+=`<line x1="${left}" x2="${right}" y1="${yy}" y2="${yy}" stroke="#7c929f" stroke-dasharray="3 5" opacity=".7"/><rect x="${right+4}" y="${yy-10}" width="70" height="21" rx="3" fill="#30484b"/><text x="${right+39}" y="${yy+4}" fill="#d6f2ed" font-size="11" text-anchor="middle">${price(data.spot)}</text>`;}
     if(!weeks.some(w=>w.drawings.some(l=>l.enabled)))out+=`<text x="${W/2}" y="210" fill="#a4b2c4" font-size="14" text-anchor="middle">尚無符合條件的價位，可放寬篩選或手動加線</text>`;
@@ -125,7 +128,7 @@
     const gamma=C.gammaAtPrice(w,l.price);
     const sign=gamma>0?'pos':gamma<0?'neg':'';
     const title=gamma===null?'此週原始 Gamma 分布沒有此價位；不估算或沿用舊值。':`整週淨 Gamma：${gamma.toLocaleString('en-US',{maximumFractionDigits:20})}（同價位各到期日帶正負號加總）`;
-    return `<span class="gamma-value ${sign}" title="${esc(title)}">${gamma===null?'—':gamma===0?'0':compact(gamma)}</span>`;
+    return `<details class="gamma-number"><summary class="gamma-value ${sign}" aria-label="${esc(title)}">${gamma===null?'—':gamma===0?'0':compact(gamma)}</summary><span class="gamma-exact">${gamma===null?'無對應原始價位':gamma.toLocaleString('en-US',{maximumFractionDigits:20})}</span></details>`;
   }
   function renderDetails() {
     const w=activeWeek();if(!w)return;
@@ -136,7 +139,7 @@
     $('expiryCaption').textContent=state.inspection.expiry==='all'?'到期日 '+w.expiries.map(s=>s.slice(5)).join(' / '):'單一到期日 '+state.inspection.expiry+' · 僅切換觀察，輸出仍按週合併';
     const rows=w.drawings.slice().sort((a,b)=>b.price-a.price);
     const sourceName=l=>l.source==='auto'?'自動':l.source==='html-flip'?'整體 Flip':l.source.startsWith('table:')?'Table '+l.source.slice(6,16).slice(5):'手動';
-    $('levelRows').innerHTML=rows.length?rows.map(l=>`<tr data-id="${l.id}"><td><input type="checkbox" data-action="enabled" aria-label="顯示 ${price(l.price)}" ${l.enabled?'checked':''}></td><td><select data-action="kind" aria-label="${price(l.price)} 線條類型"><option value="positive" ${l.kind==='positive'?'selected':''}>＋ Gamma</option><option value="negative" ${l.kind==='negative'?'selected':''}>− Gamma</option><option value="flip" ${l.kind==='flip'?'selected':''}>Flip / CE</option></select></td><td><input type="number" min="0.0001" step="any" value="${l.price}" data-action="price" aria-label="${price(l.price)} 價位"></td><td class="line-gamma">${gammaCell(w,l)}</td><td class="line-source" title="${esc(l.source)}">${esc(sourceName(l))}</td><td><button data-action="remove" class="remove" aria-label="移除 ${price(l.price)}">×</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty-text">尚無價位，點左側長條或按「加線」。</td></tr>';
+    $('levelRows').innerHTML=rows.length?rows.map(l=>`<tr data-id="${l.id}"><td class="line-enabled"><label class="line-visibility"><input type="checkbox" data-action="enabled" aria-label="顯示 ${price(l.price)}" ${l.enabled?'checked':''}><span>顯示</span></label></td><td class="line-kind" data-label="類型"><select data-action="kind" aria-label="${price(l.price)} 線條類型"><option value="positive" ${l.kind==='positive'?'selected':''}>＋ Gamma</option><option value="negative" ${l.kind==='negative'?'selected':''}>− Gamma</option><option value="flip" ${l.kind==='flip'?'selected':''}>Flip / CE</option></select></td><td class="line-price" data-label="價位"><input type="number" inputmode="decimal" min="0.0001" step="any" value="${l.price}" data-action="price" aria-label="${price(l.price)} 價位"></td><td class="line-gamma" data-label="整週淨 Gamma">${gammaCell(w,l)}</td><td class="line-source" data-label="來源" title="${esc(l.source)}">${esc(sourceName(l))}</td><td class="line-remove"><button data-action="remove" class="remove" aria-label="移除 ${price(l.price)}">×</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty-text">尚無價位，請按「加線」。</td></tr>';
     const ce=w.drawings.find(l=>l.kind==='flip');$('weekFlip').value=ce?.price??'';
     $('weekFlipNote').textContent=ce?`黃線來源：${sourceName(ce)}。手動套用會取代此週既有黃線。`:'此週尚無 CE。匯入 Lieta Table，或直接填入你確認的價位。';
     renderDistribution(w);
@@ -251,10 +254,6 @@
   $('levelRows').oninput=e=>{if(e.target.dataset.action!=='price')return;const n=Number(e.target.value),row=e.target.closest('[data-id]');if(!row||!Number.isFinite(n)||n<=0)return;const w=activeWeek(),l=w.drawings.find(x=>x.id===row.dataset.id);l.price=n;l.source='manual';row.querySelector('.line-source').textContent='手動';row.querySelector('.line-source').title='manual';row.querySelector('.line-gamma').innerHTML=gammaCell(w,l);renderPreview();};
   $('levelRows').onclick=e=>{if(e.target.dataset.action!=='remove')return;const id=e.target.closest('[data-id]').dataset.id;activeWeek().drawings=activeWeek().drawings.filter(l=>l.id!==id);render();};
   $('setFlip').onclick=()=>{const p=Number($('weekFlip').value);if(!Number.isFinite(p)||p<=0){toast('請填入有效的 Flip / CE 價位');return;}const w=activeWeek();w.drawings=w.drawings.filter(l=>l.kind!=='flip');w.drawings.push({id:uid(),kind:'flip',price:p,source:'manual',enabled:true});render();};
-  $('preview').addEventListener('pointerdown',e=>{const g=e.target.closest('[data-line]');if(!g)return;const w=state.weeks.find(w=>w.id===g.dataset.week),l=w.drawings.find(l=>l.id===g.dataset.line);drag={week:w,line:l,scale:{...chartScale},startY:e.clientY,originalPrice:l.price,moved:false};state.selected=w.id;$('preview').setPointerCapture(e.pointerId);e.preventDefault();});
-  $('preview').addEventListener('pointermove',e=>{if(!drag)return;if(Math.abs(e.clientY-drag.startY)>2)drag.moved=true;const svg=$('preview'),point=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse()),s=drag.scale;const p=s.high-(point.y-s.top)/(s.bottom-s.top)*(s.high-s.low);drag.line.price=Math.max(.01,Math.round(p*2)/2);const g=svg.querySelector(`[data-line="${drag.line.id}"]`);if(g){const originalY=Number(g.querySelector('.visible-line').getAttribute('y1'));g.setAttribute('transform',`translate(0,${point.y-originalY})`);g.querySelector('text').textContent=price(drag.line.price);}});
-  function endDrag(){if(!drag)return;if(drag.moved){drag.line.source='manual';toast('價位已調整，可在表格精確輸入');}else drag.line.price=drag.originalPrice;drag=null;render();}
-  $('preview').addEventListener('pointerup',endDrag);$('preview').addEventListener('pointercancel',endDrag);
   $('exportBtn').onclick=()=>{$('symbolInput').value=state.data.symbol;makeExport();$('exportDialog').showModal();};$('symbolInput').oninput=makeExport;$('lineWidth').onchange=makeExport;
   $('copyPine').onclick=async()=>{
     const code=$('pineCode').value,attempt=++copyAttempt;
@@ -268,14 +267,14 @@
     $('copyPine').disabled=false;
     $('copyPine').textContent=copied?'已複製 ✓':'重試複製';
     if(copied)$('exportStatus').textContent='已複製，貼到 TradingView 的 Pine 編輯器即可';
-    else{selectPineCode();$('exportStatus').textContent='瀏覽器未完成自動複製，已全選程式碼。請按 Ctrl+C（Mac：⌘C）複製，或下載 .pine。';}
+    else{selectPineCode();$('exportStatus').textContent='瀏覽器未完成自動複製，已全選程式碼。手機／平板請長按選取文字並選「拷貝」；電腦按 Ctrl+C（Mac：⌘C）複製，或下載 .pine。';}
   };
-  $('selectPine').onclick=()=>{copyAttempt++;selectPineCode();$('copyPine').disabled=!$('pineCode').value;$('copyPine').textContent='複製 Pine Script';$('exportStatus').textContent='已全選程式碼，請按 Ctrl+C（Mac：⌘C）複製';};
+  $('selectPine').onclick=()=>{copyAttempt++;selectPineCode();$('copyPine').disabled=!$('pineCode').value;$('copyPine').textContent='複製 Pine Script';$('exportStatus').textContent='已全選程式碼，手機／平板請長按選取文字並選「拷貝」；電腦按 Ctrl+C（Mac：⌘C）複製';};
   $('exportDialog').addEventListener('close',()=>{copyAttempt++;});
   $('downloadPine').onclick=()=>download(`${$('symbolInput').value.replace(/[^A-Z0-9._-]/gi,'_')}_${state.data.asOf}_Gamma.pine`,$('pineCode').value);
   $('saveProject').onclick=()=>download(`${state.data.symbol}_${state.data.asOf}_Gamma工作檔.json`,JSON.stringify({app:'Gamma Line Studio',version:1,session:snapshot()},null,2),'application/json');
   $('helpBtn').onclick=()=>$('helpDialog').showModal();document.querySelectorAll('.close-dialog').forEach(b=>b.onclick=()=>b.closest('dialog').close());
   // CE import is wired after the data-only table parser is loaded.
-  window.GammaStudio = { state, loadData, render, notice, toast, uid, activeWeek, visibleWeeks, validateProject };
+  window.GammaStudio = { state, loadData, render, renderPreview, notice, toast, uid, activeWeek, visibleWeeks, validateProject };
   render();
 })();

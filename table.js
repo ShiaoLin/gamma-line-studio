@@ -34,7 +34,7 @@
     S.state.ceRows=pending.rows.map(r=>({...r,asOf:$('ceDate').value}));
     S.state.tableMeta={filename:pending.filename||'Table HTML',symbol:$('ceSymbol').value.trim().toUpperCase(),asOf:$('ceDate').value};
     S.state.tableError='';pending=null;$('applyCE').disabled=true;$('ceReview').hidden=true;
-    applyRows();S.toast('已載入 Table，更新 CE 與 Levels，保留手動黃線');
+    applyRows();document.dispatchEvent(new Event('table-applied'));S.toast('已載入 Table，更新 CE 與 Levels，保留手動黃線');
   }
   function applyRows(){
     const mapped=C.weeklyCE(S.state.weeks,S.state.ceRows,S.state.cePolicy);
