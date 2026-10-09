@@ -43,5 +43,5 @@ test('expanded preview reuses the chart, preserves horizontal position and resto
   const prior=h.draws();h.windows.resize();assert.equal(h.draws(),prior+1);
   chart.scrollLeft=300;dialog.open=false;dialog.events.close();
   assert.equal(chart.parent,h.element('previewChartSlot'));assert.equal(chart.scrollLeft,300);
-  assert.equal(h.document.activeElement,h.element('expandPreview'));h.windows.resize();assert.equal(h.draws(),prior+2);
+  assert.equal(h.document.activeElement,h.element('expandPreview'));h.windows.resize();assert.equal(h.draws(),prior+3);
 });

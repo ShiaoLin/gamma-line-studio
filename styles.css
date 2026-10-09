@@ -114,3 +114,8 @@ button:active:not(:disabled){filter:brightness(1.15)}
 }
 
 @media(max-width:1366px){.detail-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* Keep desktop prices readable without scaling SVG text down to fit. */
+.chart-wrap svg{max-height:none}
+.dte-hint{margin:16px 0 0}.week-tabs{padding-top:10px}.week-tabs button{flex-direction:column;gap:2px;min-width:78px}.week-tabs small{font-size:11px}
+@media(min-width:1024px){.week-tabs{flex-wrap:wrap;overflow:visible}.week-tabs button{min-width:92px}.workspace{max-width:1920px}.content{padding-left:26px;padding-right:26px}}

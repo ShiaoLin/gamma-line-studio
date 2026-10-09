@@ -51,6 +51,6 @@
     chart.scrollLeft = chartScroll;
     $('expandPreview').focus({ preventScroll: true });
   });
-  window.addEventListener('resize', () => { if (dialog.open) S.renderPreview(); });
+  window.addEventListener('resize', () => { if (S.state.data) S.renderPreview(); });
   syncSettings();
 })();

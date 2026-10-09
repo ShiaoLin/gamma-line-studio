@@ -121,6 +121,35 @@
     }
     return [...groups.values()].sort((a, b) => a.start.localeCompare(b.start)).map(g => ({ ...g, expiries: [...new Set(g.expiries)].sort(), levels: [...g.levels.values()].sort((a, b) => a.price - b.price) }));
   }
+  function expiryDTE(expiry, asOf) {
+    const match = String(expiry.name || '').match(/(?:^|\s)(\d+)\s*dte\b/i);
+    const days = match ? Number(match[1]) : NaN;
+    if (Number.isSafeInteger(days) && days >= 0) return { days, source: 'html' };
+    if (!dateValid(expiry.date) || !dateValid(asOf)) return { days: null, source: 'unknown' };
+    return { days: Math.round((Date.parse(expiry.date) - Date.parse(asOf)) / DAY), source: 'date' };
+  }
+  function weekDTE(data, week) {
+    const rows = data.expiries.filter(e => week.expiries.includes(e.date)).map(e => ({ date: e.date, ...expiryDTE(e, data.asOf) }));
+    const days = rows.map(r => r.days).filter(Number.isFinite);
+    const min = Math.min(...days), max = Math.max(...days);
+    return { rows, label: days.length ? `${min === max ? min : min + '–' + max} 天` : 'DTE 未知' };
+  }
+  function integerPriceAxis(low, high, intervals = 7) {
+    if (!finite(low) || !finite(high)) throw new Error('無效的價格軸範圍。');
+    low = Math.max(0, low); high = Math.max(high, low + 1);
+    const rough = Math.max(1, (high - low) / Math.max(1, intervals));
+    const power = 10 ** Math.floor(Math.log10(rough));
+    const step = Math.max(1, [1, 2, 5, 10].find(n => n * power >= rough) * power);
+    const start = Math.floor(low / step), end = Math.ceil(high / step);
+    const ticks = Array.from({ length: Math.min(32, end - start + 1) }, (_, i) => (start + i) * step);
+    return { low: start * step, high: end * step, step, ticks };
+  }
+  function previewLayout(count, availableWidth, fit, minimumColumn = 110) {
+    const available = Math.max(280, Math.floor(availableWidth));
+    const width = fit ? available : Math.max(available, 360, count * 180 + 100);
+    const columns = fit ? Math.max(1, Math.min(count || 1, Math.floor((width - 113) / minimumColumn))) : Math.max(1, count);
+    return { width, columns, rows: Math.max(1, Math.ceil(count / columns)) };
+  }
   function selectLevels(week, spot, options = {}) {
     const { topN = DEFAULT_OPTIONS.topN, threshold = DEFAULT_OPTIONS.threshold, range = DEFAULT_OPTIONS.range, gap = DEFAULT_OPTIONS.gap } = options;
     const candidates = week.levels.filter(l => l.gamma !== 0 && (!spot || !range || Math.abs(l.price / spot - 1) <= range / 100 + 1e-10));
@@ -283,6 +312,6 @@ ${calls.join('\n')}
       ...ce.find(x => x.id === w.id).rows.map(r => ({kind:'flip', price:r.flip, enabled:true, source:`table:${r.date} / snapshot ${r.asOf || 'unknown'}`}))
     ] }));
   }
-  root.GammaCore = { DEFAULT_OPTIONS, gammaAtPrice, inspectionLevels, resetDrawings, parseHTML, groupWeeks, selectLevels, exportPine, readJSON, numericArray, dateValid, addDays, monday, COLORS, parseTable, weeklyCE };
+  root.GammaCore = { DEFAULT_OPTIONS, gammaAtPrice, inspectionLevels, resetDrawings, parseHTML, groupWeeks, expiryDTE, weekDTE, integerPriceAxis, previewLayout, selectLevels, exportPine, readJSON, numericArray, dateValid, addDays, monday, COLORS, parseTable, weeklyCE };
   if (typeof module !== 'undefined') module.exports = root.GammaCore;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

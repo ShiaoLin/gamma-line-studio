@@ -46,7 +46,7 @@
     document.dispatchEvent(new Event('gamma-loaded'));
   }
   function fillSelectors() {
-    const opts = state.weeks.map(w => `<option value="${w.start}">${w.end.slice(5)}${w.monthly ? ' 月結' : ''}</option>`).join('');
+    const opts = state.weeks.map(w => `<option value="${w.start}">${w.end.slice(5)}${w.monthly ? ' 月結' : ''} · ${C.weekDTE(state.data,w).label}</option>`).join('');
     $('fromWeek').innerHTML = opts; $('toWeek').innerHTML = opts;
     const vs = visibleWeeks(); if (!vs.length) { state.from = state.weeks[0].start; state.to = state.weeks[0].start; }
     $('fromWeek').value = state.from; $('toWeek').value = visibleWeeks().at(-1).start;
@@ -98,31 +98,54 @@
     const ceDates=[...new Set(state.ceRows.map(r=>r.asOf).filter(Boolean))];
     $('ceInfo').textContent=state.ceRows.length?`Table ${ceDates.join(' / ')} · ${state.ceRows.length} 個到期日${ceDates.some(d=>d!==data.asOf)?' · 與 Gamma 日期不同':''}`:'尚未匯入 Table。CE 與 Level 價位一律以 Table 為準。';
     $('chartCaption').textContent = `資料 ${data.asOf} · ${lines.length} 條線 · 價位示意（非 K 線）`;
-    $('weekTabs').innerHTML = weeks.map(w => `<button data-week="${w.id}" class="${w.id === state.selected ? 'active' : ''}" aria-pressed="${w.id === state.selected}">${w.end.slice(5)}${w.monthly ? ' 月結' : ''}<small>${w.expiries.length} 到期日</small></button>`).join('');
+    $('weekTabs').innerHTML = weeks.map(w => `<button data-week="${w.id}" title="${esc(C.weekDTE(data,w).rows.map(r=>r.date+': '+r.days+' 天'+(r.source==='date'?'（依資料日期計算）':'（HTML）')).join('；'))}" class="${w.id === state.selected ? 'active' : ''}" aria-pressed="${w.id === state.selected}">${w.end.slice(5)}${w.monthly ? ' 月結' : ''}<small>DTE ${C.weekDTE(data,w).label}</small></button>`).join('');
     renderPreview(); renderDetails(); optionsSync(); document.dispatchEvent(new Event('gamma-render'));
     $('exportBtn').disabled ||= !lines.length;
   }
   function renderPreview() {
-    const weeks = visibleWeeks(), data = state.data;
+    if (!state.data) return;
+    const weeks = visibleWeeks(), data = state.data, svg = $('preview'), wrap = $('chartWrap');
     const all = weeks.flatMap(w => w.drawings.filter(l => l.enabled).map(l => l.price));
     if (data.spot) all.push(data.spot);
     if (!all.length) all.push(0, 100);
-    let low = Math.min(...all), high = Math.max(...all), pad = Math.max((high-low)*.14, high*.015, 1); low -= pad; high += pad;
-    const W = Math.max(360, weeks.length * 180 + 100);
-    const host = $('previewDialogChart'), enlarged = $('previewDialog').open;
-    const H = enlarged ? Math.max(220, Math.min(520, (host.clientHeight - 20) * W / Math.max(W, host.clientWidth))) : 520;
-    const left = 35, right = W - 78, top = 52, bottom = H-42, col = (right-left)/Math.max(weeks.length,1);
-    const y = p => bottom-(p-low)/(high-low)*(bottom-top);
-    $('preview').setAttribute('viewBox', `0 0 ${W} ${H}`); $('preview').style.minWidth = W + 'px';
+    const min = Math.min(...all), max = Math.max(...all), pad = Math.max((max-min)*.14, max*.015, 1);
+    const axis = C.integerPriceAxis(min-pad, max+pad);
+    const fit = window.matchMedia('(min-width: 1024px)').matches;
+    const available = wrap.clientWidth - (wrap.parentElement.id === 'previewDialogChart' ? 0 : 16);
+    const longest = Math.max(...all.map(p => price(p).length), 5);
+    const grid = C.previewLayout(weeks.length, available, fit, Math.max(110, longest * 9 + 28));
+    const W = grid.width, enlarged = $('previewDialog').open;
+    const rowHeight = enlarged && grid.rows === 1 ? Math.max(250, Math.min(520, $('previewDialogChart').clientHeight - 20)) : 480;
+    const H = rowHeight * grid.rows, left = 24, right = W - 89;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.style.width = W + 'px'; svg.style.minWidth = W + 'px'; svg.style.height = H + 'px';
+    const mode = fit ? (grid.rows > 1 ? `適寬總覽 · ${grid.rows} 排` : '適寬總覽') : '左右滑動查看各週';
+    $('previewHint').textContent = `${mode}；新增與改價請使用價位編輯。`;
+    if (enlarged) $('previewDialogContext').textContent = `${data.symbol} · ${data.asOf} · ${mode}`;
     let out = `<rect width="${W}" height="${H}" fill="#121922"/>`;
-    for(let i=0;i<=6;i++){const p=low+(high-low)*i/6, yy=y(p);out+=`<line class="grid" x1="${left}" x2="${right}" y1="${yy}" y2="${yy}"/><text class="axis" x="${right+12}" y="${yy+4}">${price(p)}</text>`;}
-    weeks.forEach((w,i)=>{const x=left+i*col;out+=`<rect x="${x}" y="${top}" width="${col}" height="${bottom-top}" fill="${w.id===state.selected?'#88dca909':'transparent'}"/><line class="grid" x1="${x}" x2="${x}" y1="${top}" y2="${bottom}"/><text data-week="${w.id}" class="svg-week" x="${x+col/2}" y="25" fill="${w.id===state.selected?'#bcead0':'#b4c0d1'}" font-size="12" text-anchor="middle">${w.end.slice(5)}${w.monthly?' · 月结':''}</text><text class="axis" x="${x+col/2}" y="${H-13}" text-anchor="middle">${w.start.slice(5)} — ${w.end.slice(5)}</text>`;
-      const labelYs=[];
-      w.drawings.filter(l=>l.enabled).sort((a,b)=>b.price-a.price).forEach(l=>{const yy=y(l.price), color=C.COLORS[l.kind], hideLabel=l.kind==='negative'&&w.drawings.some(other=>other.enabled&&other.kind==='flip'&&Math.abs(other.price-l.price)<1e-7);let ty=yy+18;if(!hideLabel){for(const old of labelYs)if(Math.abs(ty-old)<16)ty=old+16;labelYs.push(ty);}out+=`<g class="preview-line" data-line="${l.id}" data-week="${w.id}"><title>${esc(l.kind)} ${price(l.price)} · ${esc(l.source)}${C.gammaAtPrice(w,l.price)!==null?' · 整週淨 Gamma '+compact(C.gammaAtPrice(w,l.price)):''}</title><line x1="${x+15}" x2="${x+col-15}" y1="${yy}" y2="${yy}" stroke="transparent" stroke-width="18"/><line class="visible-line" x1="${x+15}" x2="${x+col-15}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3" stroke-linecap="round"/><text visibility="${hideLabel?'hidden':'visible'}" x="${x+col/2}" y="${ty}" fill="${color}" text-anchor="middle" font-size="15" paint-order="stroke" stroke="#121922" stroke-width="4">${price(l.price)}</text></g>`;});
-    });
-    if(data.spot){const yy=y(data.spot);out+=`<line x1="${left}" x2="${right}" y1="${yy}" y2="${yy}" stroke="#7c929f" stroke-dasharray="3 5" opacity=".7"/><rect x="${right+4}" y="${yy-10}" width="70" height="21" rx="3" fill="#30484b"/><text x="${right+39}" y="${yy+4}" fill="#d6f2ed" font-size="11" text-anchor="middle">${price(data.spot)}</text>`;}
+    for (let row = 0; row < grid.rows; row++) {
+      const batch = weeks.slice(row * grid.columns, (row + 1) * grid.columns), offset = row * rowHeight;
+      const top = offset + 48, bottom = offset + rowHeight - 45;
+      const col = (right-left) / Math.max(batch.length, 1), y = p => bottom-(p-axis.low)/(axis.high-axis.low)*(bottom-top);
+      for (const p of axis.ticks) {
+        const yy = y(p);
+        out += `<line class="grid" x1="${left}" x2="${right}" y1="${yy}" y2="${yy}"/><text class="axis price-axis" x="${right+10}" y="${yy+4}">${p.toLocaleString('en-US',{maximumFractionDigits:0})}</text>`;
+      }
+      batch.forEach((w,i) => {
+        const x=left+i*col;
+        out += `<rect x="${x}" y="${top}" width="${col}" height="${bottom-top}" fill="${w.id===state.selected?'#88dca909':'transparent'}"/><line class="grid" x1="${x}" x2="${x}" y1="${top}" y2="${bottom}"/><text data-week="${w.id}" class="svg-week" x="${x+col/2}" y="${offset+25}" fill="${w.id===state.selected?'#bcead0':'#b4c0d1'}" font-size="12" text-anchor="middle">${w.end.slice(5)}${w.monthly?' · 月結':''}</text><text class="axis" x="${x+col/2}" y="${offset+rowHeight-14}" text-anchor="middle">${w.start.slice(5)} — ${w.end.slice(5)}</text>`;
+        const labelYs=[];
+        w.drawings.filter(l=>l.enabled).sort((a,b)=>b.price-a.price).forEach(l=>{
+          const yy=y(l.price), color=C.COLORS[l.kind], hideLabel=l.kind==='negative'&&w.drawings.some(other=>other.enabled&&other.kind==='flip'&&Math.abs(other.price-l.price)<1e-7);
+          let ty=yy+18;
+          if(!hideLabel){for(const old of labelYs)if(Math.abs(ty-old)<16)ty=old+16;labelYs.push(ty);}
+          out+=`<g class="preview-line" data-line="${l.id}" data-week="${w.id}"><title>${esc(l.kind)} ${price(l.price)} · ${esc(l.source)}${C.gammaAtPrice(w,l.price)!==null?' · 整週淨 Gamma '+compact(C.gammaAtPrice(w,l.price)):''}</title><line class="visible-line" x1="${x+12}" x2="${x+col-12}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3" stroke-linecap="round"/><text visibility="${hideLabel?'hidden':'visible'}" x="${x+col/2}" y="${ty}" fill="${color}" text-anchor="middle" font-size="15" paint-order="stroke" stroke="#121922" stroke-width="4">${price(l.price)}</text></g>`;
+        });
+      });
+      if(data.spot){const yy=y(data.spot);out+=`<line x1="${left}" x2="${right}" y1="${yy}" y2="${yy}" stroke="#7c929f" stroke-dasharray="3 5" opacity=".7"/><rect x="${right+4}" y="${yy-10}" width="80" height="21" rx="3" fill="#30484b"/><text class="spot-price" x="${right+44}" y="${yy+4}" fill="#d6f2ed" font-size="11" text-anchor="middle">${price(data.spot)}</text>`;}
+    }
     if(!weeks.some(w=>w.drawings.some(l=>l.enabled)))out+=`<text x="${W/2}" y="210" fill="#a4b2c4" font-size="14" text-anchor="middle">尚無符合條件的價位，可放寬篩選或手動加線</text>`;
-    $('preview').innerHTML=out;
+    svg.innerHTML=out;
   }
   function gammaCell(w,l) {
     const gamma=C.gammaAtPrice(w,l.price);
@@ -133,7 +156,7 @@
   function renderDetails() {
     const w=activeWeek();if(!w)return;
     if (!w.expiries.includes(state.inspection.expiry)) state.inspection.expiry='all';
-    $('inspectExpiry').innerHTML='<option value="all">整週合併</option>'+w.expiries.map(d=>`<option value="${d}">${d}</option>`).join('');
+    $('inspectExpiry').innerHTML='<option value="all">整週合併</option>'+w.expiries.map(d=>`<option value="${d}">${d} · DTE ${C.expiryDTE(state.data.expiries.find(e=>e.date===d),state.data.asOf).days} 天</option>`).join('');
     $('inspectExpiry').value=state.inspection.expiry; $('inspectAll').checked=state.inspection.allPrices;
     $('distributionTitle').textContent=`${w.end.slice(5)} 結算週 · Gamma 分布`;
     $('expiryCaption').textContent=state.inspection.expiry==='all'?'到期日 '+w.expiries.map(s=>s.slice(5)).join(' / '):'單一到期日 '+state.inspection.expiry+' · 僅切換觀察，輸出仍按週合併';

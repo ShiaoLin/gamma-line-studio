@@ -86,3 +86,35 @@ test('reset with missing last-date CE does not substitute an earlier expiry',()=
 test('nan expiry labels yield actionable error even when annotation dates exist',()=>{
   assert.throws(()=>C.parseHTML(tiny([{type:'bar',name:'nan',x:[1],y:[100]}],{annotations:[{text:'2026-10-09 +sigma'}]})),/到期日標籤為 nan/);
 });
+
+test('expiry DTE uses HTML labels, accepts zero, and falls back to snapshot date for old workspaces',()=>{
+  assert.deepEqual(C.expiryDTE({date:'2026-10-09',name:'2026-10-09 (w|週) 0 dte GEX: 10'},'2026-10-09'),{days:0,source:'html'});
+  assert.deepEqual(C.expiryDTE({date:'2026-10-16',name:'2026-10-16 (m|月) 7 dte'},'2026-10-09'),{days:7,source:'html'});
+  assert.equal(C.expiryDTE({date:'2026-10-16',name:'2026-10-16 8 DTE'},'2026-10-09').days,8);
+  assert.deepEqual(C.expiryDTE({date:'2026-10-16'},'2026-10-09'),{days:7,source:'date'});
+  assert.equal(C.expiryDTE({date:'2027-01-01'},'2026-12-31').days,1);
+  assert.equal(C.expiryDTE({date:'invalid'},'2026-10-09').days,null);
+});
+test('weekly DTE shows actual expiry ranges, including holiday weeks ending Thursday',()=>{
+  const data={asOf:'2026-10-09',expiries:[{date:'2026-10-12',name:'2026-10-12 3 dte'},{date:'2026-10-14',name:'2026-10-14 5 dte'},{date:'2026-10-16',name:'2026-10-16 7 dte'}]};
+  assert.equal(C.weekDTE(data,{expiries:data.expiries.map(e=>e.date)}).label,'3–7 天');
+  assert.equal(C.weekDTE(data,{expiries:['2026-10-16']}).label,'7 天');
+  assert.equal(C.weekDTE({asOf:'2026-11-23',expiries:[{date:'2026-11-26'}]},{expiries:['2026-11-26']}).label,'3 天');
+});
+test('price axes use uniform integer 1/2/5 steps, cover the requested range, and never round drawing prices',()=>{
+  for(const [low,high] of [[.01,.9],[3.2,8.7],[92.35,114.65],[164.7,297.3],[840.25,1200.75],[6874.12,8137.5],[100,100]]){
+    const a=C.integerPriceAxis(low,high);
+    assert.ok(a.low<=low&&a.high>=high&&a.high>a.low);assert.ok(a.step>=1&&Number.isInteger(a.step));
+    assert.ok(a.ticks.every(Number.isInteger));assert.ok(a.ticks.length>=2&&a.ticks.length<=10);
+    assert.ok(a.ticks.slice(1).every((p,i)=>p-a.ticks[i]===a.step));
+    assert.ok([1,2,5].includes(a.step/10**Math.floor(Math.log10(a.step))));
+  }
+  assert.deepEqual(C.integerPriceAxis(0,6).ticks,[0,1,2,3,4,5,6]);
+  assert.equal(C.integerPriceAxis(0,70).step,10);assert.equal(C.integerPriceAxis(0,350).step,50);assert.equal(C.integerPriceAxis(0,700).step,100);
+});
+test('desktop fits all ten or twelve weeks; more weeks wrap into rows and mobile retains horizontal space',()=>{
+  for(const n of [10,12]){const grid=C.previewLayout(n,1520,true);assert.equal(grid.width,1520);assert.equal(grid.rows,1);assert.equal(grid.columns,n);}
+  const many=C.previewLayout(32,1520,true);assert.equal(many.width,1520);assert.ok(many.rows>1);assert.ok(many.columns*many.rows>=32);
+  const mobile=C.previewLayout(12,358,false);assert.ok(mobile.width>358);assert.equal(mobile.rows,1);
+  assert.equal(C.previewLayout(1,358,false).columns,1);
+});

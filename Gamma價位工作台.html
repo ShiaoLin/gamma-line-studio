@@ -115,9 +115,14 @@ button:active:not(:disabled){filter:brightness(1.15)}
 }
 
 @media(max-width:1366px){.detail-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* Keep desktop prices readable without scaling SVG text down to fit. */
+.chart-wrap svg{max-height:none}
+.dte-hint{margin:16px 0 0}.week-tabs{padding-top:10px}.week-tabs button{flex-direction:column;gap:2px;min-width:78px}.week-tabs small{font-size:11px}
+@media(min-width:1024px){.week-tabs{flex-wrap:wrap;overflow:visible}.week-tabs button{min-width:92px}.workspace{max-width:1920px}.content{padding-left:26px;padding-right:26px}}
 </style></head>
 <body>
-<header class="app-header"><div class="brand"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#172c26"/><path d="M10 25V10h15M10 16h9" stroke="#86dbb0" stroke-width="2.5" fill="none"/></svg><div><strong>Gamma Line Studio</strong><span>每週價位工作台</span></div><span class="version">v1.3.0</span></div><div class="header-actions"><button id="helpBtn" class="quiet">使用說明</button><button id="saveProject">儲存工作檔</button><button id="exportBtn" class="primary">匯出到 TradingView <span aria-hidden="true">↗</span></button></div></header>
+<header class="app-header"><div class="brand"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#172c26"/><path d="M10 25V10h15M10 16h9" stroke="#86dbb0" stroke-width="2.5" fill="none"/></svg><div><strong>Gamma Line Studio</strong><span>每週價位工作台</span></div><span class="version">v1.3.1</span></div><div class="header-actions"><button id="helpBtn" class="quiet">使用說明</button><button id="saveProject">儲存工作檔</button><button id="exportBtn" class="primary">匯出到 TradingView <span aria-hidden="true">↗</span></button></div></header>
 <main class="workspace">
 <aside class="sidebar" aria-label="資料與篩選設定">
 <button id="settingsToggle" class="settings-toggle" aria-expanded="true" aria-controls="settingsBody"><span><strong>資料與設定</strong><small id="settingsSummary">先載入 Gamma，再匯入 Table</small></span><span id="settingsAction">收合設定</span></button>
@@ -145,7 +150,8 @@ button:active:not(:disabled){filter:brightness(1.15)}
 <div class="page-intro"><div><div class="eyebrow">GAMMA → WEEKLY LEVELS</div><h1>把分布，變成你的價位。</h1><p>自動挑選、逐週微調，一次畫進 TradingView。</p></div><div class="loaded-badge"><span class="status-dot"></span><span id="loadStatus">準備資料</span></div></div>
 <div id="notice" class="notice" role="status" hidden></div>
 <div id="workflowStatus" class="workflow-status" role="status" aria-live="polite" data-state="empty"></div><section id="emptyState" class="empty-state panel"><div class="eyebrow">從你的資料開始</div><h2>載入一份 Gamma HTML</h2><p>選擇 ticker 的 Gamma 檔案後，即可查看每週分布、調整價位，再匯入 Table 設定 CE。</p><button id="emptyUpload" class="primary">選取 Gamma HTML / 工作檔</button><small>一次處理一個 ticker · 原始 HTML 留在你的瀏覽器</small></section><div id="loadedContent" hidden><div class="metrics"><div><span>標的 / 資料日期</span><strong id="symbolMetric">—</strong><small id="dateMetric">—</small></div><div><span>快照現價</span><strong id="spotMetric">—</strong><small>來自 HTML，不是即時報價</small></div><div><span>結算日 → 結算週</span><strong id="weeksMetric">—</strong><small id="rangeMetric">—</small></div><div><span>已選線條</span><strong id="linesMetric">—</strong><small id="linesDetail">—</small></div></div>
-<section class="panel preview-panel" id="previewPanel"><div class="panel-heading"><div><h2>每週畫線預覽</h2><p>左右滑動查看各週；新增與改價請使用價位編輯。</p></div><div class="preview-actions"><button id="expandPreview" aria-haspopup="dialog">放大預覽</button><div class="legend"><span class="pos">━ 正 Gamma</span><span class="neg">━ 負 Gamma</span><span class="flip">━ Flip / CE</span></div></div></div><div id="previewChartSlot"><div class="chart-wrap" id="chartWrap" tabindex="0" role="region" aria-label="每週畫線預覽，可左右捲動"><svg id="preview" viewBox="0 0 1000 440" role="img" aria-label="每週 Gamma 價位預覽"></svg></div></div><div class="chart-footer"><span id="chartCaption"></span><span>美東時間 · 週一至週五 · 週間留白</span></div></section>
+<section class="panel preview-panel" id="previewPanel"><div class="panel-heading"><div><h2>每週畫線預覽</h2><p id="previewHint">桌機適寬總覽；手機可左右滑動查看各週。</p></div><div class="preview-actions"><button id="expandPreview" aria-haspopup="dialog">放大預覽</button><div class="legend"><span class="pos">━ 正 Gamma</span><span class="neg">━ 負 Gamma</span><span class="flip">━ Flip / CE</span></div></div></div><div id="previewChartSlot"><div class="chart-wrap" id="chartWrap" tabindex="0" role="region" aria-label="每週畫線預覽，可左右捲動"><svg id="preview" viewBox="0 0 1000 440" role="img" aria-label="每週 Gamma 價位預覽"></svg></div></div><div class="chart-footer"><span id="chartCaption"></span><span>美東時間 · 週一至週五 · 週間留白</span></div></section>
+<p class="hint dte-hint">DTE：距 Gamma 資料日的到期天數；同週多個到期日顯示天數範圍，不是以電腦今天重新倒數。</p>
 <div id="weekTabs" class="week-tabs" role="group" aria-label="選擇要編輯的結算週"></div>
 <nav class="detail-nav" aria-label="本週詳細資料"><a href="#levelEditor">編輯價位</a><a href="#distributionPanel">觀察分布</a></nav>
 <div class="detail-grid"><section class="panel" id="distributionPanel"><div class="panel-heading"><div><h2 id="distributionTitle">Gamma 分布</h2><p id="expiryCaption"></p></div><span class="tag">分布觀察</span></div><div class="inspection-controls"><label class="field">觀察到期日<select id="inspectExpiry"><option value="all">整週合併</option></select></label><label class="checkbox"><input id="inspectAll" type="checkbox">查看全部履約價</label><p id="distributionScope" class="hint"></p></div><div class="distribution-scroll"><svg id="distribution" viewBox="0 0 460 350" role="img" aria-label="選取週的 Gamma 分布"></svg></div><div class="chart-footer">點長條可加入／隱藏本週價位；顏色以整週淨 Gamma 決定。</div><div class="contribution-section"><div class="contribution-controls"><label class="field">觀察價位（不改動選線）<select id="inspectPrice"></select></label><button id="toggleInspectLevel">加入本週價位</button></div><div id="contributionDetails"></div></div></section>
@@ -289,6 +295,35 @@ button:active:not(:disabled){filter:brightness(1.15)}
       for (const l of expiry.levels) { const key = Number(l.price.toFixed(8)); const old = group.levels.get(key) || { price: key, gamma: 0, gross: 0, contributions: [] }; old.gamma += l.gamma; old.gross += Math.abs(l.gamma); old.contributions.push({ expiry: expiry.date, gamma: l.gamma }); group.levels.set(key, old); }
     }
     return [...groups.values()].sort((a, b) => a.start.localeCompare(b.start)).map(g => ({ ...g, expiries: [...new Set(g.expiries)].sort(), levels: [...g.levels.values()].sort((a, b) => a.price - b.price) }));
+  }
+  function expiryDTE(expiry, asOf) {
+    const match = String(expiry.name || '').match(/(?:^|\s)(\d+)\s*dte\b/i);
+    const days = match ? Number(match[1]) : NaN;
+    if (Number.isSafeInteger(days) && days >= 0) return { days, source: 'html' };
+    if (!dateValid(expiry.date) || !dateValid(asOf)) return { days: null, source: 'unknown' };
+    return { days: Math.round((Date.parse(expiry.date) - Date.parse(asOf)) / DAY), source: 'date' };
+  }
+  function weekDTE(data, week) {
+    const rows = data.expiries.filter(e => week.expiries.includes(e.date)).map(e => ({ date: e.date, ...expiryDTE(e, data.asOf) }));
+    const days = rows.map(r => r.days).filter(Number.isFinite);
+    const min = Math.min(...days), max = Math.max(...days);
+    return { rows, label: days.length ? `${min === max ? min : min + '–' + max} 天` : 'DTE 未知' };
+  }
+  function integerPriceAxis(low, high, intervals = 7) {
+    if (!finite(low) || !finite(high)) throw new Error('無效的價格軸範圍。');
+    low = Math.max(0, low); high = Math.max(high, low + 1);
+    const rough = Math.max(1, (high - low) / Math.max(1, intervals));
+    const power = 10 ** Math.floor(Math.log10(rough));
+    const step = Math.max(1, [1, 2, 5, 10].find(n => n * power >= rough) * power);
+    const start = Math.floor(low / step), end = Math.ceil(high / step);
+    const ticks = Array.from({ length: Math.min(32, end - start + 1) }, (_, i) => (start + i) * step);
+    return { low: start * step, high: end * step, step, ticks };
+  }
+  function previewLayout(count, availableWidth, fit, minimumColumn = 110) {
+    const available = Math.max(280, Math.floor(availableWidth));
+    const width = fit ? available : Math.max(available, 360, count * 180 + 100);
+    const columns = fit ? Math.max(1, Math.min(count || 1, Math.floor((width - 113) / minimumColumn))) : Math.max(1, count);
+    return { width, columns, rows: Math.max(1, Math.ceil(count / columns)) };
   }
   function selectLevels(week, spot, options = {}) {
     const { topN = DEFAULT_OPTIONS.topN, threshold = DEFAULT_OPTIONS.threshold, range = DEFAULT_OPTIONS.range, gap = DEFAULT_OPTIONS.gap } = options;
@@ -452,7 +487,7 @@ ${calls.join('\n')}
       ...ce.find(x => x.id === w.id).rows.map(r => ({kind:'flip', price:r.flip, enabled:true, source:`table:${r.date} / snapshot ${r.asOf || 'unknown'}`}))
     ] }));
   }
-  root.GammaCore = { DEFAULT_OPTIONS, gammaAtPrice, inspectionLevels, resetDrawings, parseHTML, groupWeeks, selectLevels, exportPine, readJSON, numericArray, dateValid, addDays, monday, COLORS, parseTable, weeklyCE };
+  root.GammaCore = { DEFAULT_OPTIONS, gammaAtPrice, inspectionLevels, resetDrawings, parseHTML, groupWeeks, expiryDTE, weekDTE, integerPriceAxis, previewLayout, selectLevels, exportPine, readJSON, numericArray, dateValid, addDays, monday, COLORS, parseTable, weeklyCE };
   if (typeof module !== 'undefined') module.exports = root.GammaCore;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script><script>(function (root, factory) {
@@ -525,7 +560,7 @@ ${calls.join('\n')}
     document.dispatchEvent(new Event('gamma-loaded'));
   }
   function fillSelectors() {
-    const opts = state.weeks.map(w => `<option value="${w.start}">${w.end.slice(5)}${w.monthly ? ' 月結' : ''}</option>`).join('');
+    const opts = state.weeks.map(w => `<option value="${w.start}">${w.end.slice(5)}${w.monthly ? ' 月結' : ''} · ${C.weekDTE(state.data,w).label}</option>`).join('');
     $('fromWeek').innerHTML = opts; $('toWeek').innerHTML = opts;
     const vs = visibleWeeks(); if (!vs.length) { state.from = state.weeks[0].start; state.to = state.weeks[0].start; }
     $('fromWeek').value = state.from; $('toWeek').value = visibleWeeks().at(-1).start;
@@ -577,31 +612,54 @@ ${calls.join('\n')}
     const ceDates=[...new Set(state.ceRows.map(r=>r.asOf).filter(Boolean))];
     $('ceInfo').textContent=state.ceRows.length?`Table ${ceDates.join(' / ')} · ${state.ceRows.length} 個到期日${ceDates.some(d=>d!==data.asOf)?' · 與 Gamma 日期不同':''}`:'尚未匯入 Table。CE 與 Level 價位一律以 Table 為準。';
     $('chartCaption').textContent = `資料 ${data.asOf} · ${lines.length} 條線 · 價位示意（非 K 線）`;
-    $('weekTabs').innerHTML = weeks.map(w => `<button data-week="${w.id}" class="${w.id === state.selected ? 'active' : ''}" aria-pressed="${w.id === state.selected}">${w.end.slice(5)}${w.monthly ? ' 月結' : ''}<small>${w.expiries.length} 到期日</small></button>`).join('');
+    $('weekTabs').innerHTML = weeks.map(w => `<button data-week="${w.id}" title="${esc(C.weekDTE(data,w).rows.map(r=>r.date+': '+r.days+' 天'+(r.source==='date'?'（依資料日期計算）':'（HTML）')).join('；'))}" class="${w.id === state.selected ? 'active' : ''}" aria-pressed="${w.id === state.selected}">${w.end.slice(5)}${w.monthly ? ' 月結' : ''}<small>DTE ${C.weekDTE(data,w).label}</small></button>`).join('');
     renderPreview(); renderDetails(); optionsSync(); document.dispatchEvent(new Event('gamma-render'));
     $('exportBtn').disabled ||= !lines.length;
   }
   function renderPreview() {
-    const weeks = visibleWeeks(), data = state.data;
+    if (!state.data) return;
+    const weeks = visibleWeeks(), data = state.data, svg = $('preview'), wrap = $('chartWrap');
     const all = weeks.flatMap(w => w.drawings.filter(l => l.enabled).map(l => l.price));
     if (data.spot) all.push(data.spot);
     if (!all.length) all.push(0, 100);
-    let low = Math.min(...all), high = Math.max(...all), pad = Math.max((high-low)*.14, high*.015, 1); low -= pad; high += pad;
-    const W = Math.max(360, weeks.length * 180 + 100);
-    const host = $('previewDialogChart'), enlarged = $('previewDialog').open;
-    const H = enlarged ? Math.max(220, Math.min(520, (host.clientHeight - 20) * W / Math.max(W, host.clientWidth))) : 520;
-    const left = 35, right = W - 78, top = 52, bottom = H-42, col = (right-left)/Math.max(weeks.length,1);
-    const y = p => bottom-(p-low)/(high-low)*(bottom-top);
-    $('preview').setAttribute('viewBox', `0 0 ${W} ${H}`); $('preview').style.minWidth = W + 'px';
+    const min = Math.min(...all), max = Math.max(...all), pad = Math.max((max-min)*.14, max*.015, 1);
+    const axis = C.integerPriceAxis(min-pad, max+pad);
+    const fit = window.matchMedia('(min-width: 1024px)').matches;
+    const available = wrap.clientWidth - (wrap.parentElement.id === 'previewDialogChart' ? 0 : 16);
+    const longest = Math.max(...all.map(p => price(p).length), 5);
+    const grid = C.previewLayout(weeks.length, available, fit, Math.max(110, longest * 9 + 28));
+    const W = grid.width, enlarged = $('previewDialog').open;
+    const rowHeight = enlarged && grid.rows === 1 ? Math.max(250, Math.min(520, $('previewDialogChart').clientHeight - 20)) : 480;
+    const H = rowHeight * grid.rows, left = 24, right = W - 89;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.style.width = W + 'px'; svg.style.minWidth = W + 'px'; svg.style.height = H + 'px';
+    const mode = fit ? (grid.rows > 1 ? `適寬總覽 · ${grid.rows} 排` : '適寬總覽') : '左右滑動查看各週';
+    $('previewHint').textContent = `${mode}；新增與改價請使用價位編輯。`;
+    if (enlarged) $('previewDialogContext').textContent = `${data.symbol} · ${data.asOf} · ${mode}`;
     let out = `<rect width="${W}" height="${H}" fill="#121922"/>`;
-    for(let i=0;i<=6;i++){const p=low+(high-low)*i/6, yy=y(p);out+=`<line class="grid" x1="${left}" x2="${right}" y1="${yy}" y2="${yy}"/><text class="axis" x="${right+12}" y="${yy+4}">${price(p)}</text>`;}
-    weeks.forEach((w,i)=>{const x=left+i*col;out+=`<rect x="${x}" y="${top}" width="${col}" height="${bottom-top}" fill="${w.id===state.selected?'#88dca909':'transparent'}"/><line class="grid" x1="${x}" x2="${x}" y1="${top}" y2="${bottom}"/><text data-week="${w.id}" class="svg-week" x="${x+col/2}" y="25" fill="${w.id===state.selected?'#bcead0':'#b4c0d1'}" font-size="12" text-anchor="middle">${w.end.slice(5)}${w.monthly?' · 月结':''}</text><text class="axis" x="${x+col/2}" y="${H-13}" text-anchor="middle">${w.start.slice(5)} — ${w.end.slice(5)}</text>`;
-      const labelYs=[];
-      w.drawings.filter(l=>l.enabled).sort((a,b)=>b.price-a.price).forEach(l=>{const yy=y(l.price), color=C.COLORS[l.kind], hideLabel=l.kind==='negative'&&w.drawings.some(other=>other.enabled&&other.kind==='flip'&&Math.abs(other.price-l.price)<1e-7);let ty=yy+18;if(!hideLabel){for(const old of labelYs)if(Math.abs(ty-old)<16)ty=old+16;labelYs.push(ty);}out+=`<g class="preview-line" data-line="${l.id}" data-week="${w.id}"><title>${esc(l.kind)} ${price(l.price)} · ${esc(l.source)}${C.gammaAtPrice(w,l.price)!==null?' · 整週淨 Gamma '+compact(C.gammaAtPrice(w,l.price)):''}</title><line x1="${x+15}" x2="${x+col-15}" y1="${yy}" y2="${yy}" stroke="transparent" stroke-width="18"/><line class="visible-line" x1="${x+15}" x2="${x+col-15}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3" stroke-linecap="round"/><text visibility="${hideLabel?'hidden':'visible'}" x="${x+col/2}" y="${ty}" fill="${color}" text-anchor="middle" font-size="15" paint-order="stroke" stroke="#121922" stroke-width="4">${price(l.price)}</text></g>`;});
-    });
-    if(data.spot){const yy=y(data.spot);out+=`<line x1="${left}" x2="${right}" y1="${yy}" y2="${yy}" stroke="#7c929f" stroke-dasharray="3 5" opacity=".7"/><rect x="${right+4}" y="${yy-10}" width="70" height="21" rx="3" fill="#30484b"/><text x="${right+39}" y="${yy+4}" fill="#d6f2ed" font-size="11" text-anchor="middle">${price(data.spot)}</text>`;}
+    for (let row = 0; row < grid.rows; row++) {
+      const batch = weeks.slice(row * grid.columns, (row + 1) * grid.columns), offset = row * rowHeight;
+      const top = offset + 48, bottom = offset + rowHeight - 45;
+      const col = (right-left) / Math.max(batch.length, 1), y = p => bottom-(p-axis.low)/(axis.high-axis.low)*(bottom-top);
+      for (const p of axis.ticks) {
+        const yy = y(p);
+        out += `<line class="grid" x1="${left}" x2="${right}" y1="${yy}" y2="${yy}"/><text class="axis price-axis" x="${right+10}" y="${yy+4}">${p.toLocaleString('en-US',{maximumFractionDigits:0})}</text>`;
+      }
+      batch.forEach((w,i) => {
+        const x=left+i*col;
+        out += `<rect x="${x}" y="${top}" width="${col}" height="${bottom-top}" fill="${w.id===state.selected?'#88dca909':'transparent'}"/><line class="grid" x1="${x}" x2="${x}" y1="${top}" y2="${bottom}"/><text data-week="${w.id}" class="svg-week" x="${x+col/2}" y="${offset+25}" fill="${w.id===state.selected?'#bcead0':'#b4c0d1'}" font-size="12" text-anchor="middle">${w.end.slice(5)}${w.monthly?' · 月結':''}</text><text class="axis" x="${x+col/2}" y="${offset+rowHeight-14}" text-anchor="middle">${w.start.slice(5)} — ${w.end.slice(5)}</text>`;
+        const labelYs=[];
+        w.drawings.filter(l=>l.enabled).sort((a,b)=>b.price-a.price).forEach(l=>{
+          const yy=y(l.price), color=C.COLORS[l.kind], hideLabel=l.kind==='negative'&&w.drawings.some(other=>other.enabled&&other.kind==='flip'&&Math.abs(other.price-l.price)<1e-7);
+          let ty=yy+18;
+          if(!hideLabel){for(const old of labelYs)if(Math.abs(ty-old)<16)ty=old+16;labelYs.push(ty);}
+          out+=`<g class="preview-line" data-line="${l.id}" data-week="${w.id}"><title>${esc(l.kind)} ${price(l.price)} · ${esc(l.source)}${C.gammaAtPrice(w,l.price)!==null?' · 整週淨 Gamma '+compact(C.gammaAtPrice(w,l.price)):''}</title><line class="visible-line" x1="${x+12}" x2="${x+col-12}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3" stroke-linecap="round"/><text visibility="${hideLabel?'hidden':'visible'}" x="${x+col/2}" y="${ty}" fill="${color}" text-anchor="middle" font-size="15" paint-order="stroke" stroke="#121922" stroke-width="4">${price(l.price)}</text></g>`;
+        });
+      });
+      if(data.spot){const yy=y(data.spot);out+=`<line x1="${left}" x2="${right}" y1="${yy}" y2="${yy}" stroke="#7c929f" stroke-dasharray="3 5" opacity=".7"/><rect x="${right+4}" y="${yy-10}" width="80" height="21" rx="3" fill="#30484b"/><text class="spot-price" x="${right+44}" y="${yy+4}" fill="#d6f2ed" font-size="11" text-anchor="middle">${price(data.spot)}</text>`;}
+    }
     if(!weeks.some(w=>w.drawings.some(l=>l.enabled)))out+=`<text x="${W/2}" y="210" fill="#a4b2c4" font-size="14" text-anchor="middle">尚無符合條件的價位，可放寬篩選或手動加線</text>`;
-    $('preview').innerHTML=out;
+    svg.innerHTML=out;
   }
   function gammaCell(w,l) {
     const gamma=C.gammaAtPrice(w,l.price);
@@ -612,7 +670,7 @@ ${calls.join('\n')}
   function renderDetails() {
     const w=activeWeek();if(!w)return;
     if (!w.expiries.includes(state.inspection.expiry)) state.inspection.expiry='all';
-    $('inspectExpiry').innerHTML='<option value="all">整週合併</option>'+w.expiries.map(d=>`<option value="${d}">${d}</option>`).join('');
+    $('inspectExpiry').innerHTML='<option value="all">整週合併</option>'+w.expiries.map(d=>`<option value="${d}">${d} · DTE ${C.expiryDTE(state.data.expiries.find(e=>e.date===d),state.data.asOf).days} 天</option>`).join('');
     $('inspectExpiry').value=state.inspection.expiry; $('inspectAll').checked=state.inspection.allPrices;
     $('distributionTitle').textContent=`${w.end.slice(5)} 結算週 · Gamma 分布`;
     $('expiryCaption').textContent=state.inspection.expiry==='all'?'到期日 '+w.expiries.map(s=>s.slice(5)).join(' / '):'單一到期日 '+state.inspection.expiry+' · 僅切換觀察，輸出仍按週合併';
@@ -894,7 +952,7 @@ ${calls.join('\n')}
     chart.scrollLeft = chartScroll;
     $('expandPreview').focus({ preventScroll: true });
   });
-  window.addEventListener('resize', () => { if (dialog.open) S.renderPreview(); });
+  window.addEventListener('resize', () => { if (S.state.data) S.renderPreview(); });
   syncSettings();
 })();
 </script></body></html>
