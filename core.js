@@ -128,6 +128,18 @@
     if (!dateValid(expiry.date) || !dateValid(asOf)) return { days: null, source: 'unknown' };
     return { days: Math.round((Date.parse(expiry.date) - Date.parse(asOf)) / DAY), source: 'date' };
   }
+  function groupPeriods(data, mode = 'expiry') {
+    if (mode === 'weekly') return groupWeeks(data);
+    if (mode !== 'expiry') throw new Error('無效的結算顯示方式。');
+    return groupWeeks(data).flatMap(week => week.expiries.map((date, i) => ({
+      id: date, mode: 'expiry', start: i ? addDays(week.expiries[i - 1], 1) : week.start,
+      end: date, expiries: [date], monthly: data.expiries.some(e => e.date === date && e.monthly),
+      levels: inspectionLevels(week, date).map(l => ({ ...l,
+        contributions: l.contributions.filter(c => c.expiry === date),
+        gross: l.contributions.filter(c => c.expiry === date).reduce((sum, c) => sum + Math.abs(c.gamma), 0)
+      }))
+    })));
+  }
   function weekDTE(data, week) {
     const rows = data.expiries.filter(e => week.expiries.includes(e.date)).map(e => ({ date: e.date, ...expiryDTE(e, data.asOf) }));
     const days = rows.map(r => r.days).filter(Number.isFinite);
@@ -146,9 +158,8 @@
   }
   function previewLayout(count, availableWidth, fit, minimumColumn = 110) {
     const available = Math.max(280, Math.floor(availableWidth));
-    const width = fit ? available : Math.max(available, 360, count * 180 + 100);
-    const columns = fit ? Math.max(1, Math.min(count || 1, Math.floor((width - 113) / minimumColumn))) : Math.max(1, count);
-    return { width, columns, rows: Math.max(1, Math.ceil(count / columns)) };
+    const width = fit ? Math.max(available, count * minimumColumn + 113) : Math.max(available, 360, count * 180 + 100);
+    return { width, columns: Math.max(1, count), rows: 1 };
   }
   function selectLevels(week, spot, options = {}) {
     const { topN = DEFAULT_OPTIONS.topN, threshold = DEFAULT_OPTIONS.threshold, range = DEFAULT_OPTIONS.range, gap = DEFAULT_OPTIONS.gap } = options;
@@ -175,11 +186,12 @@
   const COLORS = { positive: '#45be75', negative: '#ff4d65', flip: '#ffd23f' };
   function pineDate(date, hour, minute) { const [y, m, d] = date.split('-').map(Number); return `timestamp("America/New_York", ${y}, ${m}, ${d}, ${hour}, ${minute})`; }
   function exportPine(data, weeks, options = {}) {
+    const perExpiry = weeks.some(w => w.mode === 'expiry');
     const symbol = String(data.symbol).trim().toUpperCase();
     if (!/^[A-Z0-9.^!:/_-]{1,24}$/.test(symbol) || symbol === 'UNKNOWN') throw new Error('請先填寫有效的股票代號。');
     const lines = weeks.flatMap(w => w.drawings.filter(l => l.enabled).map(l => ({ ...l, start: w.start, end: w.end })));
     if (!lines.length) throw new Error('請至少選取一條線。');
-    if (lines.length > 480) throw new Error('線條超過 480 條，請減少結算週或價位數。');
+    if (lines.length > 480) throw new Error('線條超過 480 條，請減少結算期間或價位數。');
     if (lines.some(l => !finite(l.price) || l.price <= 0 || !dateValid(l.start) || !dateValid(l.end) || !COLORS[l.kind])) throw new Error('匯出含有無效價位或日期。');
     const names = { positive: 'positiveColor', negative: 'negativeColor', flip: 'flipColor' };
     const q = JSON.stringify;
@@ -188,36 +200,41 @@
     const calls = lines.map(l => `    drawLevel(${pineDate(l.start, 9, 30)}, ${pineDate(l.end, 16, 0)}, ${l.price}, ${names[l.kind]}, ${q(l.kind === 'flip' ? 'Gamma Flip / CE · ' + l.source : (l.kind === 'positive' ? '+Gamma' : '-Gamma') + ' · ' + l.source)})`);
     return `//@version=6
 // Source snapshot: ${data.asOf}. Static imported Gamma levels, not a live data feed.
-// Same-strike signed Gamma is summed within each Monday-Friday expiry week.
+// ${perExpiry ? 'Same-strike signed Gamma is summed only within the same expiry date.' : 'Same-strike signed Gamma is summed within each Monday-Friday expiry week.'}
 // CE and named Levels come from Lieta Table; the HTML overall Flip is never substituted.
-indicator("Gamma Lines · ${symbol} · ${data.asOf}", overlay = true, max_lines_count = 500, max_labels_count = 500)
+indicator("Gamma Lines · ${symbol} · ${data.asOf}", overlay = true, max_lines_count = 500, max_boxes_count = 500)
 positiveColor = input.color(color.rgb(69, 190, 117), "正 Gamma", group = "樣式")
 negativeColor = input.color(color.rgb(255, 77, 101), "負 Gamma", group = "樣式")
 flipColor = input.color(color.rgb(255, 210, 63), "Gamma Flip / CE", group = "樣式")
 lineWidth = input.int(${Math.min(6, Math.max(1, options.width || 3))}, "線寬", minval = 1, maxval = 6, group = "樣式")
-weekGap = input.bool(true, "週間留白（終點取週五開盤）", group = "樣式")
+weekGap = input.bool(true, "${perExpiry ? '期間留白（終點提前 30 分鐘）' : '週間留白（終點取週五開盤）'}", group = "樣式")
 showLabels = input.bool(true, "顯示價位", group = "樣式")
 showSource = input.bool(true, "顯示資料日期", group = "資料")
 labelSize = input.string("large", "字體大小", options = ["tiny", "small", "normal", "large"], group = "樣式")
+// Match the previous label font sizes; box size.large would otherwise be larger.
+int priceTextSize = labelSize == "tiny" ? 7 : labelSize == "small" ? 10 : labelSize == "normal" ? 12 : 18
 strictSymbol = input.bool(true, "檢查股票代號", group = "資料")
 var array<line> drawnLines = array.new<line>()
-var array<label> drawnLabels = array.new<label>()
+var array<box> drawnTexts = array.new<box>()
 var table sourceTable = table.new(position.bottom_right, 1, 1)
 drawLevel(int startTime, int endTime, float price, color tint, string note) =>
-    int segmentEnd = weekGap ? endTime - 23400000 : endTime
+    int segmentEnd = weekGap ? endTime - ${perExpiry ? 1800000 : 23400000} : endTime
     array.push(drawnLines, line.new(startTime, price, segmentEnd, price, xloc = xloc.bar_time, extend = extend.none, color = tint, width = lineWidth))
     if showLabels
-        array.push(drawnLabels, label.new(int((startTime + segmentEnd) / 2), price, str.tostring(price, format.mintick), xloc = xloc.bar_time, yloc = yloc.price, style = label.style_label_up, color = color.new(tint, 100), textcolor = tint, size = labelSize, tooltip = note))
+        // Center inside the rendered line endpoints, not at a separately rounded timestamp.
+        // Top alignment removes the old label pointer gap and brings text closer to the line.
+        // Explicit transparent colors keep text visible; na colors suppress box text on TradingView.
+        array.push(drawnTexts, box.new(left = startTime, top = price, right = segmentEnd, bottom = price - syminfo.mintick, xloc = xloc.bar_time, border_color = color.new(tint, 100), bgcolor = color.new(tint, 100), text = str.tostring(price, format.mintick), text_color = tint, text_size = priceTextSize, text_halign = text.align_center, text_valign = text.align_top, text_wrap = text.wrap_none))
 if barstate.islast
     table.cell(sourceTable, 0, 0, showSource ? ${q(provenance)} : "", text_color = chart.fg_color, text_size = size.small, bgcolor = color.new(color.black, 55))
     if strictSymbol and syminfo.ticker != "${symbol.split(':').pop()}"
         runtime.error("請切換到 ${symbol} 圖表，或關閉代號檢查。")
     for item in drawnLines
         line.delete(item)
-    for item in drawnLabels
-        label.delete(item)
+    for item in drawnTexts
+        box.delete(item)
     array.clear(drawnLines)
-    array.clear(drawnLabels)
+    array.clear(drawnTexts)
 ${calls.join('\n')}
 `;
   }
@@ -293,7 +310,7 @@ ${calls.join('\n')}
   }
   function weeklyCE(weeks, rows, policy = 'last') {
     return weeks.map(w => {
-      const matches = rows.filter(r => finite(r.flip) && r.flip > 0 && r.date >= w.start && r.date <= w.end).sort((a,b) => a.date.localeCompare(b.date));
+      const matches = rows.filter(r => finite(r.flip) && r.flip > 0 && (w.mode === 'expiry' ? w.expiries.includes(r.date) : r.date >= w.start && r.date <= w.end)).sort((a,b) => a.date.localeCompare(b.date));
       // Never backfill a missing Friday CE with Wednesday's value when Friday is in Gamma data.
       const lastDate = w.expiries.at(-1);
       return { id: w.id, rows: policy === 'all' ? matches : matches.filter(r => r.date === lastDate) };
@@ -312,6 +329,6 @@ ${calls.join('\n')}
       ...ce.find(x => x.id === w.id).rows.map(r => ({kind:'flip', price:r.flip, enabled:true, source:`table:${r.date} / snapshot ${r.asOf || 'unknown'}`}))
     ] }));
   }
-  root.GammaCore = { DEFAULT_OPTIONS, gammaAtPrice, inspectionLevels, resetDrawings, parseHTML, groupWeeks, expiryDTE, weekDTE, integerPriceAxis, previewLayout, selectLevels, exportPine, readJSON, numericArray, dateValid, addDays, monday, COLORS, parseTable, weeklyCE };
+  root.GammaCore = { DEFAULT_OPTIONS, gammaAtPrice, inspectionLevels, resetDrawings, parseHTML, groupWeeks, groupPeriods, expiryDTE, weekDTE, integerPriceAxis, previewLayout, selectLevels, exportPine, readJSON, numericArray, dateValid, addDays, monday, COLORS, parseTable, weeklyCE };
   if (typeof module !== 'undefined') module.exports = root.GammaCore;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

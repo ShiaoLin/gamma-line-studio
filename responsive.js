@@ -16,7 +16,7 @@
     $('settingsToggle').setAttribute('aria-expanded', String(!hidden));
     $('settingsAction').textContent = hidden ? '展開設定' : '收合設定';
     $('settingsSummary').textContent = s.data
-      ? `${s.data.symbol} · ${s.data.asOf} · ${weeks.length ? weeks[0].start.slice(5) + ' — ' + weeks.at(-1).end.slice(5) : '未選週別'} · ${weeks.length} 週`
+      ? `${s.data.symbol} · ${s.data.asOf} · ${weeks.length ? weeks[0].start.slice(5) + ' — ' + weeks.at(-1).end.slice(5) : '未選週別'} · ${weeks.length} ${s.mode === 'expiry' ? '期' : '週'}`
       : '先載入 Gamma，再匯入 Table';
   }
   function finishImport() {
@@ -35,7 +35,7 @@
   let chartScroll = 0;
   $('expandPreview').onclick = () => {
     chartScroll = chart.scrollLeft;
-    $('previewDialogContext').textContent = `${S.state.data.symbol} · ${S.state.data.asOf} · 左右滑動查看各週`;
+    $('previewDialogContext').textContent = `${S.state.data.symbol} · ${S.state.data.asOf} · 左右滑動查看各期間`;
     $('previewDialogChart').append(chart);
     dialog.showModal();
     document.body.classList.add('preview-open');

@@ -61,6 +61,22 @@ test('price lookup uses signed weekly net and distinguishes zero from missing',(
   assert.equal(C.gammaAtPrice({...week,levels:[{price:100,gamma:200}]},100),200);
 });
 test('Pine price labels default to Large',()=>{const w=C.groupWeeks(multi)[1];w.drawings=[{price:230,kind:'positive',enabled:true,source:'auto'}];assert.match(C.exportPine(multi,[w]),/labelSize = input\.string\("large", "字體大小"/);});
+
+test('Pine centers text between line endpoints on daily and intraday charts',()=>{
+  for(const mode of ['expiry','weekly']) {
+    const p=C.exportPine(multi,[{mode,start:'2026-10-12',end:'2026-10-12',drawings:[{price:247.5,kind:'positive',enabled:true,source:'auto'}]}]);
+    assert.match(p,/line\.new\(startTime, price, segmentEnd, price/);
+    assert.match(p,/box\.new\(left = startTime, top = price, right = segmentEnd, bottom = price - syminfo\.mintick/);
+    assert.match(p,/text_halign = text\.align_center, text_valign = text\.align_top, text_wrap = text\.wrap_none/);
+    assert.match(p,/border_color = color\.new\(tint, 100\), bgcolor = color\.new\(tint, 100\)/);
+    assert.match(p,/text_color = tint, text_size = priceTextSize/);
+    assert.match(p,/max_boxes_count = 500/);
+    assert.match(p,/box\.delete\(item\)/);
+    assert.match(p,/array\.clear\(drawnTexts\)/);
+    assert.doesNotMatch(p,/label\.new|\(startTime\s*\+\s*segmentEnd\)\s*\/\s*2/);
+    assert.match(p,/, 247\.5, positiveColor/);
+  }
+});
 test('hidden lines excluded and decimal precision preserved',()=>{const w={start:'2026-10-05',end:'2026-10-09',drawings:[{price:937.5,kind:'flip',enabled:true,source:'manual'},{price:999,kind:'negative',enabled:false,source:'manual'}]};const p=C.exportPine(multi,[w]);assert.match(p,/, 937.5, flipColor/);assert.doesNotMatch(p,/, 999,/);});
 test('default window includes large 25% away strike and preserves adjacent levels',()=>{
   const result=C.selectLevels({levels:[{price:125,gamma:100},{price:124.5,gamma:80},{price:135,gamma:1000},{price:110,gamma:10},{price:90,gamma:-40}]},100);
@@ -112,9 +128,43 @@ test('price axes use uniform integer 1/2/5 steps, cover the requested range, and
   assert.deepEqual(C.integerPriceAxis(0,6).ticks,[0,1,2,3,4,5,6]);
   assert.equal(C.integerPriceAxis(0,70).step,10);assert.equal(C.integerPriceAxis(0,350).step,50);assert.equal(C.integerPriceAxis(0,700).step,100);
 });
-test('desktop fits all ten or twelve weeks; more weeks wrap into rows and mobile retains horizontal space',()=>{
+test('desktop fits all ten or twelve weeks; more periods scroll in one row and mobile retains horizontal space',()=>{
   for(const n of [10,12]){const grid=C.previewLayout(n,1520,true);assert.equal(grid.width,1520);assert.equal(grid.rows,1);assert.equal(grid.columns,n);}
-  const many=C.previewLayout(32,1520,true);assert.equal(many.width,1520);assert.ok(many.rows>1);assert.ok(many.columns*many.rows>=32);
+  const many=C.previewLayout(32,1520,true);assert.ok(many.width>1520);assert.equal(many.rows,1);assert.ok(many.columns*many.rows>=32);
   const mobile=C.previewLayout(12,358,false);assert.ok(mobile.width>358);assert.equal(mobile.rows,1);
   assert.equal(C.previewLayout(1,358,false).columns,1);
+});
+
+test('expiry grouping keeps daily signed Gamma separate and combines duplicate same-date traces',()=>{
+  const data={asOf:'2026-10-05',expiries:[
+    {date:'2026-10-05',levels:[{price:100,gamma:20}]},
+    {date:'2026-10-07',levels:[{price:100,gamma:-50}]},
+    {date:'2026-10-09',levels:[{price:100,gamma:40}]},
+    {date:'2026-10-09',monthly:true,levels:[{price:100,gamma:-10}]},
+    {date:'2026-10-16',levels:[{price:100,gamma:60}]}
+  ]};
+  const periods=C.groupPeriods(data);
+  assert.deepEqual(periods.map(p=>[p.start,p.end]),[['2026-10-05','2026-10-05'],['2026-10-06','2026-10-07'],['2026-10-08','2026-10-09'],['2026-10-12','2026-10-16']]);
+  assert.deepEqual(periods.map(p=>p.levels[0].gamma),[20,-50,30,60]);
+  assert.equal(periods[2].monthly,true);assert.equal(periods[2].levels[0].gross,50);
+  assert.equal(C.groupPeriods(data,'weekly')[0].levels[0].gamma,0);
+  assert.deepEqual(C.groupPeriods(data,'weekly'),C.groupWeeks(data));
+  assert.ok(periods.every(p=>p.levels.every(l=>l.contributions.every(c=>c.expiry===p.end))));
+  assert.throws(()=>C.groupPeriods(data,'bad'));
+});
+
+test('expiry CE is exact-date only, including missing Wednesday and holiday Thursday expiry',()=>{
+  const data={asOf:'2026-11-23',expiries:['2026-11-23','2026-11-25','2026-11-26'].map(date=>({date,levels:[{price:100,gamma:5}]}))};
+  const periods=C.groupPeriods(data), rows=[{date:'2026-11-23',flip:100},{date:'2026-11-24',flip:999},{date:'2026-11-26',flip:102}];
+  for(const policy of ['last','all'])assert.deepEqual(C.weeklyCE(periods,rows,policy).map(p=>p.rows.map(r=>r.flip)),[[100],[],[102]]);
+  assert.equal(periods.at(-1).end,'2026-11-26');
+});
+
+test('expiry Pine uses actual segment dates and positive duration even for one-day segments',()=>{
+  const data={symbol:'TEST',asOf:'2026-10-05',expiries:['2026-10-05','2026-10-07','2026-10-09'].map(date=>({date,levels:[{price:100.25,gamma:5}]}))};
+  const periods=C.resetDrawings(C.groupPeriods(data),100,[]),code=C.exportPine(data,periods);
+  assert.match(code,/2026, 10, 5, 9, 30\).*2026, 10, 5, 16, 0\), 100\.25/);
+  assert.match(code,/2026, 10, 6, 9, 30\).*2026, 10, 7, 16, 0/);
+  assert.match(code,/endTime - 1800000/);assert.doesNotMatch(code,/endTime - 23400000/);
+  assert.match(C.exportPine(data,C.resetDrawings(C.groupWeeks(data),100)),/endTime - 23400000/);
 });

@@ -6,16 +6,16 @@
     if(!pending||!S.state.data||S.state.busy){$('applyCE').disabled=true;return;}
     const symbol=$('ceSymbol').value.trim().toUpperCase(),date=$('ceDate').value,sameSymbol=symbol===S.state.data.symbol&&(!pending.symbol||pending.symbol===symbol),sameDate=date===S.state.data.asOf;
     const matches=C.weeklyCE(S.state.weeks,pending.rows,S.state.cePolicy),covered=matches.filter(w=>w.rows.length).length;
-    const overlaps=pending.rows.some(r=>S.state.weeks.some(w=>r.date>=w.start&&r.date<=w.end));
+    const overlaps=pending.rows.some(r=>S.state.weeks.some(w=>w.mode==='expiry'?w.expiries.includes(r.date):r.date>=w.start&&r.date<=w.end));
     $('mismatchChoice').hidden=!date||sameDate;
     if(sameDate)$('allowMismatch').checked=false;
-    const msgs=[`已讀取 ${pending.rows.length} 個到期日，可對應 ${covered} 個結算週。`,`Gamma：${S.state.data.symbol} / ${S.state.data.asOf}；Table：${symbol||'未辨識代號'} / ${date||'未辨識日期'}`];
+    const msgs=[`已讀取 ${pending.rows.length} 個到期日，可對應 ${covered} 個結算期間。`,`Gamma：${S.state.data.symbol} / ${S.state.data.asOf}；Table：${symbol||'未辨識代號'} / ${date||'未辨識日期'}`];
     if(!sameSymbol)msgs.push('股票代號不一致：Table 必須和 Gamma 為同一股票。');
     if(!date)msgs.push('Table 缺少日期，請填寫資料實際日期。');
     else if(!sameDate)msgs.push('資料日期不同。若有意跨日比較，請勾選下方選項。');
-    if(covered<S.state.weeks.length)msgs.push('未匹配到最後到期日的結算週會保持空白，不用較早的 CE 補上。');
+    if(covered<S.state.weeks.length)msgs.push('缺少對應日期的 CE 會保持空白，不用其他日期補上。');
     msgs.push(...pending.warnings);$('cePreview').textContent=msgs.join('\n');
-    if(!overlaps)msgs.push('Table 與目前 Gamma 沒有重疊的結算週，無法套用。');
+    if(!overlaps)msgs.push('Table 與目前 Gamma 沒有重疊的結算期間，無法套用。');
     $('cePreview').textContent=msgs.join('\n');
     $('applyCE').disabled=!(sameSymbol&&C.dateValid(date)&&overlaps&&(sameDate||$('allowMismatch').checked));
   }
@@ -24,7 +24,7 @@
       pending=C.parseTable(text,name);$('ceSymbol').value=pending.symbol||'';$('ceSymbol').readOnly=!!pending.symbol;$('ceDate').value=pending.asOf||'';$('ceDate').readOnly=!!pending.asOf;$('allowMismatch').checked=false;
       $('ceFields').hidden=false;$('applyCE').hidden=false;preview();
       if(!$('applyCE').disabled)commitTable();
-      else{S.state.tableError='Table 尚未套用，請在載入區下方核對代號、日期與結算週。';S.render();}
+      else{S.state.tableError='Table 尚未套用，請在載入區下方核對代號、日期與結算期間。';S.render();}
     }
     catch(e){fail(e.message);}
   }
@@ -36,20 +36,20 @@
     S.state.tableError='';pending=null;$('applyCE').disabled=true;$('ceReview').hidden=true;
     applyRows();document.dispatchEvent(new Event('table-applied'));S.toast('已載入 Table，更新 CE 與 Levels，保留手動黃線');
   }
-  function applyRows(){
+  function applyRows(preserveVisibility=false){
     const mapped=C.weeklyCE(S.state.weeks,S.state.ceRows,S.state.cePolicy);
-    for(const w of S.state.weeks){w.drawings=w.drawings.filter(l=>!l.source.startsWith('table:'));if(w.drawings.some(l=>l.kind==='flip'&&l.source==='manual'))continue;
+    for(const w of S.state.weeks){const previous=w.drawings;w.drawings=w.drawings.filter(l=>!l.source.startsWith('table:'));if(w.drawings.some(l=>l.kind==='flip'&&l.source==='manual'))continue;
       const rows=mapped.find(x=>x.id===w.id).rows;
-      for(const r of rows)w.drawings.push({id:S.uid(),kind:'flip',price:r.flip,enabled:true,source:`table:${r.date} / snapshot ${r.asOf||'unknown'}`});
+      for(const r of rows){const source=`table:${r.date} / snapshot ${r.asOf||'unknown'}`,old=preserveVisibility&&previous.find(l=>l.source===source&&l.price===r.flip);w.drawings.push({id:S.uid(),kind:'flip',price:r.flip,enabled:old?old.enabled:true,source});}
     }
     S.render();
   }
   function renderReference(){
     const week=S.activeWeek();if(!week)return;
-    const rows=S.state.ceRows.filter(r=>r.date>=week.start&&r.date<=week.end),last=week.expiries.at(-1);
+    const rows=S.state.ceRows.filter(r=>week.mode==='expiry'?week.expiries.includes(r.date):r.date>=week.start&&r.date<=week.end),last=week.expiries.at(-1);
     const fields=['Gamma_Flip','Gamma_Field','Key_Delta','Call_Wall','Put_Wall','Call_Dominate','Put_Dominate','Pos_1Sigma','Neg_1Sigma'];
-    $('tableReferenceCaption').textContent=`${week.end.slice(5)} 結算週 · 黃線預設取 ${last} 的 Gamma_Flip · 其他欄位保留 Table 原值`;
-    $('tableReference').innerHTML=rows.length?'<table><thead><tr><th>Expiration</th>'+fields.map(f=>'<th>'+f+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r.date)+(r.date===last?' ●':'')+'</td>'+fields.map(f=>'<td class="'+(f==='Gamma_Flip'?'flip':'')+'">'+esc((f==='Gamma_Flip'?r.flip:r.levels?.[f])??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'<p class="empty-text">本週尚無 Table 資料，Level 價位保持空白。</p>';
+    $('tableReferenceCaption').textContent=`${week.end.slice(5)} 結算期間 · 黃線${S.state.mode === 'expiry' ? '配對 ' + last : S.state.cePolicy === 'all' ? '保留本週各到期日' : '取 ' + last} 的 Gamma_Flip · 其他欄位保留 Table 原值`;
+    $('tableReference').innerHTML=rows.length?'<table><thead><tr><th>Expiration</th>'+fields.map(f=>'<th>'+f+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r.date)+(r.date===last?' ●':'')+'</td>'+fields.map(f=>'<td class="'+(f==='Gamma_Flip'?'flip':'')+'">'+esc((f==='Gamma_Flip'?r.flip:r.levels?.[f])??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'<p class="empty-text">本期尚無 Table 資料，Level 價位保持空白。</p>';
   }
   function clearPending(){readId++;reading=false;pending=null;$('importCE').disabled=false;$('tableFile').value='';$('ceReview').hidden=true;$('ceFields').hidden=true;$('ceSymbol').value='';$('ceDate').value='';$('ceSymbol').readOnly=false;$('ceDate').readOnly=false;$('allowMismatch').checked=false;$('mismatchChoice').hidden=true;$('cePreview').textContent='尚未載入 Table。';$('applyCE').disabled=true;$('applyCE').hidden=true;}
   function pickTable(){if(!S.state.data||S.state.busy||reading)return;clearPending();$('tableFile').click();}
@@ -80,4 +80,5 @@
   $('cePolicy').onchange=()=>{S.state.cePolicy=$('cePolicy').value;applyRows();};
   document.addEventListener('gamma-render',renderReference);renderReference();
   document.addEventListener('gamma-loaded',clearPending);
+  document.addEventListener('gamma-mode-changed',()=>{applyRows(true);if(pending)preview();});
 })();

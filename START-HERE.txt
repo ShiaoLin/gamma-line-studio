@@ -1,13 +1,13 @@
-Gamma Line Studio v1.3.1 — 本機使用說明
+Gamma Line Studio v1.4.0 — 本機使用說明
 
 不用下載也可直接使用：https://shiaolin.github.io/gamma-line-studio/
 線上版與本機版都在自己的瀏覽器解析檔案，不上傳 Gamma / Table。
 
 1. 將 ZIP 解壓縮到自己的資料夾。
-2. 用 Chrome、Edge 或 Firefox 開啟 Gamma-Line-Studio-v1.3.1.html。
+2. 用 Chrome、Edge 或 Firefox 開啟 Gamma-Line-Studio-v1.4.0.html。
    不需要 Codex、Node.js、帳號登入或安裝套件。
 3. 點「載入 Gamma HTML」，選取你自己的 Lieta Gamma HTML。
-4. 選擇結算範圍，匯入同 ticker 的 Table HTML，確認資料日期。僅接受 HTML；不提供 CSV 匯入／匯出。
+4. 預設逐到期日；可切換「合併至週五」，兩模式的編輯分別保存。選擇結算範圍，匯入同 ticker 的 Table HTML，確認資料日期。僅接受 HTML；不提供 CSV 匯入／匯出。
 5. 調整線條後，匯出 Pine Script，貼進 TradingView 的 Pine 編輯器。
 
 程式不附行情資料，也不會自動下載 Gamma / Table。
@@ -16,6 +16,7 @@ Gamma Line Studio v1.3.1 — 本機使用說明
 複製受瀏覽器限制時，按「全選程式碼」，再按 Ctrl+C（Mac：⌘C）。
 儲存工作檔會下載 JSON；確認檔案已出現在下載資料夾，再關閉或重新整理。
 之後用「載入 Gamma HTML」選擇這份 JSON，可恢復已儲存的研究。
+新版工作檔 v2 保存兩模式草稿，需用 v1.4.0 或更新版開啟；舊 v1 工作檔仍可匯入，並維持週模式。
 若瀏覽器阻擋下載，請檢查下載權限或換用一般桌面瀏覽器。
 
 詳細說明：README.md

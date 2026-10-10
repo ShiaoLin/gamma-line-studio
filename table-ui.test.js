@@ -73,14 +73,45 @@ test('Level text round-trips verbatim in workspaces, clears on new Gamma, and is
   const data={symbol:'TEST',asOf:'2026-10-05',warnings:[],expiries:[{date:'2026-10-09',levels:[{price:105,gamma:10}]}]};
   const weeks=C.groupWeeks(data);weeks[0].drawings=[{price:105,kind:'positive',source:'manual',enabled:true}];
   const text='<script>alert("inert")</script>\nCall Wall: 110; Put Wall: 90';
-  const state={data,weeks,from:weeks[0].start,to:weeks[0].start,selected:weeks[0].start,options:{...C.DEFAULT_OPTIONS},levelText:text};
+  const state={mode:'weekly',modeDrafts:{},inspection:{expiry:'all',allPrices:false,price:null},data,weeks,from:weeks[0].start,to:weeks[0].start,selected:weeks[0].start,options:{...C.DEFAULT_OPTIONS},levelText:text};
   const context=vm.createContext({C,state,uid:()=>1,render(){},regenerate(){},fillSelectors(){},optionsSync(){},notice(){},$:()=>({}),document:{dispatchEvent(){}},Event:class{}});
   const extract=(start,end)=>appScript.slice(appScript.indexOf(start),appScript.indexOf(end));
-  vm.runInContext(extract('  function snapshot()','  function optionsSync()')+extract('  function validateProject(','  async function importFiles(')+extract('  function loadData(','  function fillSelectors('),context);
+  vm.runInContext(extract('  function draft()','  function toast(')+extract('  function snapshot()','  function optionsSync()')+extract('  function validateProject(','  async function importFiles(')+extract('  function loadData(','  function fillSelectors('),context);
   vm.runInContext('saved=JSON.parse(JSON.stringify({app:"Gamma Line Studio",version:1,session:snapshot()})); restored=validateProject(saved); loadData(restored.data,restored);',context);
   assert.equal(state.levelText,text);assert.equal(context.restored.levelText,text);
   assert.doesNotMatch(C.exportPine(data,weeks),/inert|Call Wall/);
   vm.runInContext('loadData(state.data)',context);assert.equal(state.levelText,'');
   for(const invalid of [{value:'object'},'x'.repeat(50001)]){context.saved.session.levelText=invalid;assert.throws(()=>vm.runInContext('validateProject(saved)',context),/Level/);}
   delete context.saved.session.levelText;assert.doesNotThrow(()=>vm.runInContext('validateProject(saved)',context));
+});
+
+test('mode switching and workspace restore retain independent manual drawings, hidden state and filters',()=>{
+  const data={symbol:'TEST',asOf:'2026-10-05',spot:100,warnings:[],expiries:['2026-10-05','2026-10-07','2026-10-09'].map(date=>({date,levels:[{price:100,gamma:10}]}))};
+  const state={data,mode:'expiry',modeDrafts:{},weeks:C.groupPeriods(data),from:'2026-10-05',to:'2026-10-08',selected:'2026-10-07',options:{...C.DEFAULT_OPTIONS},inspection:{expiry:'all',allPrices:false,price:null}};
+  for(const w of state.weeks)w.drawings=[{price:101.25,kind:'positive',source:'manual',enabled:false}];
+  let next=0;const context=vm.createContext({C,state,uid:()=>String(++next),render(){},regenerate(){},fillSelectors(){},optionsSync(){},notice(){},toast(){},$:()=>({}),document:{dispatchEvent(){}},Event:class{}});
+  const extract=(start,end)=>appScript.slice(appScript.indexOf(start),appScript.indexOf(end));
+  vm.runInContext(extract('  function draft()','  function toast(')+extract('  function snapshot()','  function optionsSync()')+extract('  function switchMode(','  function renderStatus(')+extract('  function loadData(','  function fillSelectors(')+extract('  function validateProject(','  async function importFiles('),context);
+  vm.runInContext("switchMode('weekly')",context);
+  assert.equal(state.weeks.length,1);assert.equal(state.weeks[0].levels[0].gamma,30);
+  state.weeks[0].drawings=[{price:99.5,kind:'negative',source:'manual',enabled:true}];state.options.topN=6;
+  vm.runInContext("switchMode('expiry')",context);
+  assert.equal(state.weeks.length,3);assert.equal(state.options.topN,3);
+  assert.ok(state.weeks.every(w=>w.drawings[0].price===101.25&&!w.drawings[0].enabled));
+  vm.runInContext('saved=JSON.parse(JSON.stringify({app:"Gamma Line Studio",version:2,session:snapshot()})); restored=validateProject(saved); loadData(restored.data,restored);',context);
+  assert.equal(state.mode,'expiry');assert.equal(state.weeks[0].drawings[0].price,101.25);
+  vm.runInContext("switchMode('weekly')",context);
+  assert.equal(state.options.topN,6);assert.equal(state.weeks[0].drawings[0].price,99.5);
+  context.saved.session.modeDrafts.weekly.weeks[0].drawings[0].price=-1;
+  assert.throws(()=>vm.runInContext('validateProject(saved)',context),/無效線條/);
+  vm.runInContext('loadData(state.data)',context);
+  assert.equal(state.mode,'expiry');assert.equal(Object.keys(state.modeDrafts).length,0);
+});
+
+test('restoring an expiry draft refreshes Table CE while preserving hidden matched CE and manual overrides',()=>{
+  const h=setup();h.state.weeks=[{id:'2026-10-07',mode:'expiry',start:'2026-10-06',end:'2026-10-07',expiries:['2026-10-07'],drawings:[{price:99,kind:'flip',source:'table:2026-10-07 / snapshot 2026-10-05',enabled:false}]}];
+  h.state.ceRows=[{date:'2026-10-06',flip:123,asOf:'2026-10-05'},{date:'2026-10-07',flip:99,asOf:'2026-10-05'}];
+  h.events['gamma-mode-changed']();assert.equal(h.state.weeks[0].drawings.length,1);assert.equal(h.state.weeks[0].drawings[0].enabled,false);
+  h.state.ceRows[1].flip=98;h.events['gamma-mode-changed']();assert.equal(h.state.weeks[0].drawings[0].price,98);
+  h.state.weeks[0].drawings=[{price:97,kind:'flip',source:'manual',enabled:true}];h.events['gamma-mode-changed']();assert.equal(h.state.weeks[0].drawings[0].price,97);
 });
